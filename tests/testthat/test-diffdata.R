@@ -1,55 +1,67 @@
-test_that("diffdata validates inputs correctly", {
-  # Valid inputs should work
+test_that("diffdata validates x and y", {
   df1 <- tibble(a = 1:5, b = letters[1:5])
   df2 <- tibble(a = c(1:4, 6), b = letters[1:5])
 
-  # Test x must be a tibble
-  expect_error(diffdata("not_a_dataframe", df2), "x must be a data frame")
-  expect_error(diffdata(NULL, df2), "x must be a data frame")
-  expect_error(diffdata(list(a = 1:5), df2), "x must be a data frame")
+  expect_error(diffdata("not_a_dataframe", df2), "'x'.*data.frame")
+  expect_error(diffdata(NULL, df2), "'x'.*data.frame")
+  expect_error(diffdata(list(a = 1:5), df2), "'x'.*data.frame")
+  expect_error(diffdata(df1, "not_a_dataframe"), "'y'.*data.frame")
+  expect_error(diffdata(df1, NULL), "'y'.*data.frame")
 
-  # Test y must be a tibble
-  expect_error(diffdata(df1, "not_a_dataframe"), "y must be a data frame")
-  expect_error(diffdata(df1, NULL), "y must be a data frame")
+  expect_error(diffdata(tibble(), df2), "'x'.*at least 1 row")
+  expect_error(diffdata(df1, tibble()), "'y'.*at least 1 row")
+})
 
-  # Test x must have at least one row
-  expect_error(
-    diffdata(tibble(), df2),
-    "x must have at least one row"
-  )
+test_that("diffdata validates max_differences", {
+  df1 <- tibble(a = 1:5)
+  df2 <- tibble(a = c(1:4, 6L))
 
-  # Test y must have at least one row
-  expect_error(
-    diffdata(df1, tibble()),
-    "y must have at least one row"
-  )
-
-  # Test max_differences must be numeric and length 1
   expect_error(
     diffdata(df1, df2, max_differences = "ten"),
-    "max_differences must be numeric"
+    "'max_differences'.*number"
   )
   expect_error(
     diffdata(df1, df2, max_differences = 1:3),
-    "max_differences must be length 1"
+    "'max_differences'.*length 1"
   )
+  expect_error(
+    diffdata(df1, df2, max_differences = -1),
+    "'max_differences'.*>= 0"
+  )
+})
 
-  # Test context_rows must be numeric and length 2
+test_that("diffdata validates context_rows", {
+  df1 <- tibble(a = 1:5)
+  df2 <- tibble(a = c(1:4, 6L))
+
   expect_error(
     diffdata(df1, df2, context_rows = "three"),
-    "context_rows must be numeric"
+    "'context_rows'.*integerish"
   )
   expect_error(
     diffdata(df1, df2, context_rows = 1:3),
-    "context_rows must be length 2"
+    "'context_rows'.*length 2"
   )
+  expect_error(diffdata(df1, df2, context_rows = 3), "'context_rows'.*length 2")
   expect_error(
-    diffdata(df1, df2, context_rows = 3),
-    "context_rows must be length 2"
+    diffdata(df1, df2, context_rows = c(-1L, 0L)),
+    "'context_rows'.*>= 0"
   )
+})
 
-  # Test column differences handling
+test_that("diffdata validates tolerance and output_file", {
+  df1 <- tibble(a = 1:5)
+  df2 <- tibble(a = c(1:4, 6L))
+
+  expect_error(diffdata(df1, df2, tolerance = -1), "'tolerance'.*>= 0")
+  expect_error(diffdata(df1, df2, tolerance = "0.1"), "'tolerance'.*number")
+  expect_error(diffdata(df1, df2, output_file = 123), "'output_file'.*string")
+})
+
+test_that("diffdata returns column differences visibly", {
+  df1 <- tibble(a = 1:5, b = letters[1:5])
   df3 <- tibble(a = 1:5, c = letters[1:5]) # different column names
+
   expect_message(
     result <- diffdata(df1, df3),
     "Cannot diff data with column differences."
@@ -57,6 +69,11 @@ test_that("diffdata validates inputs correctly", {
 
   expect_true(is.data.frame(result))
   expect_true(".diff" %in% names(result))
+})
+
+test_that("render_diff validates the diff argument", {
+  expect_error(render_diff("nope"), "'diff'.*data.frame")
+  expect_error(render_diff(tibble(a = 1)), "must include")
 })
 
 test_that("diffdata handles edge cases", {
@@ -113,5 +130,12 @@ test_that("render_diff errors when the output_file directory does not exist", {
   expect_error(
     render_diff(diff, output_file = "/nonexistent-datadiff-dir/report.html"),
     "output_file"
+  )
+})
+
+test_that("diffdata and compare_data share argument order", {
+  expect_equal(
+    names(formals(diffdata)),
+    c(names(formals(compare_data)), "output_file")
   )
 })

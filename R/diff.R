@@ -92,6 +92,13 @@ show_diff <- function(diffs) {
 #'   provided, or a temporary file path).
 #' @export
 render_diff <- function(diff, output_file = NULL) {
+  checkmate::assert_data_frame(diff)
+  checkmate::assert_names(
+    names(diff),
+    must.include = c(".row", ".join_type", ".diff_type", ".source")
+  )
+  checkmate::assert_string(output_file, null.ok = TRUE)
+
   if (nrow(diff) == 0) {
     cli::cli_alert_info("No differences to render.")
     return(invisible(NULL))

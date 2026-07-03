@@ -25,6 +25,7 @@ Suggests:
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports:
+    checkmate,
     dplyr,
     rlang,
     tidyselect,

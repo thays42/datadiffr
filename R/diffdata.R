@@ -4,10 +4,12 @@
 #' an HTML report in the RStudio viewer or browser.
 #'
 #' @param x,y Data frames to diff.
-#' @param max_differences Maximum number of differing rows to report.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
 #' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
+#' @param max_differences Maximum number of differing rows to report. Defaults
+#'   to 10 (unlike [compare_data()], which reports everything) to keep
+#'   reports fast to render.
 #' @param tolerance Numeric tolerance for comparing numeric values.
 #' @param output_file Optional file path to save the HTML report. If provided,
 #'   the report is saved to this location instead of opening in the viewer.
@@ -18,25 +20,23 @@
 diffdata <- function(
   x,
   y,
-  max_differences = 10,
   context_rows = c(3L, 3L),
   context_cols = everything(),
+  max_differences = 10,
   tolerance = .Machine$double.eps^0.5,
   output_file = NULL
 ) {
-  stopifnot(
-    "x must be a data frame" = is.data.frame(x),
-    "x must have at least one row" = nrow(x) > 0,
-    "y must be a data frame" = is.data.frame(y),
-    "y must have at least one row" = nrow(y) > 0,
-    "max_differences must be numeric" = is.numeric(max_differences),
-    "max_differences must be length 1" = length(max_differences) == 1,
-    "context_rows must be numeric" = is.numeric(context_rows),
-    "context_rows must be length 2" = length(context_rows) == 2,
-    "tolerance must be numeric" = is.numeric(tolerance),
-    "tolerance must be length 1" = length(tolerance) == 1,
-    "tolerance must be non-negative" = tolerance >= 0
+  checkmate::assert_data_frame(x, min.rows = 1)
+  checkmate::assert_data_frame(y, min.rows = 1)
+  checkmate::assert_number(max_differences, lower = 0)
+  checkmate::assert_integerish(
+    context_rows,
+    len = 2,
+    lower = 0,
+    any.missing = FALSE
   )
+  checkmate::assert_number(tolerance, lower = 0)
+  checkmate::assert_string(output_file, null.ok = TRUE)
 
   max_differences <- as.integer(max_differences)
   context_rows <- as.integer(context_rows)

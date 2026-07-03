@@ -31,17 +31,16 @@ compare_data <- function(
   max_differences = Inf,
   tolerance = .Machine$double.eps^0.5
 ) {
-  stopifnot(
-    "x must be a data frame" = is.data.frame(x),
-    "y must be a data frame" = is.data.frame(y),
-    "context_rows must be numeric" = is.numeric(context_rows),
-    "context_rows must be length 2" = length(context_rows) == 2,
-    "max_differences must be numeric" = is.numeric(max_differences),
-    "max_differences must be length 1" = length(max_differences) == 1,
-    "tolerance must be numeric" = is.numeric(tolerance),
-    "tolerance must be length 1" = length(tolerance) == 1,
-    "tolerance must be non-negative" = tolerance >= 0
+  checkmate::assert_data_frame(x)
+  checkmate::assert_data_frame(y)
+  checkmate::assert_integerish(
+    context_rows,
+    len = 2,
+    lower = 0,
+    any.missing = FALSE
   )
+  checkmate::assert_number(max_differences, lower = 0)
+  checkmate::assert_number(tolerance, lower = 0)
 
   if (length(intersect(names(x), names(y))) == 0) {
     cli::cli_abort("`x` and `y` have no columns in common.")
@@ -211,10 +210,8 @@ compare_diff <- function(
 #'   are excluded from the output.
 #' @export
 compare_groups <- function(x, y, group_cols) {
-  stopifnot(
-    "x must be a data frame" = is.data.frame(x),
-    "y must be a data frame" = is.data.frame(y)
-  )
+  checkmate::assert_data_frame(x)
+  checkmate::assert_data_frame(y)
 
   x_groups <- x |> select({{ group_cols }}) |> distinct()
   if (any(c("in_x", "in_y") %in% names(x_groups))) {
@@ -248,10 +245,8 @@ compare_groups <- function(x, y, group_cols) {
 #'   Returns an empty data frame if there are no differences.
 #' @export
 compare_columns <- function(x, y) {
-  stopifnot(
-    "x must be a data frame" = is.data.frame(x),
-    "y must be a data frame" = is.data.frame(y)
-  )
+  checkmate::assert_data_frame(x)
+  checkmate::assert_data_frame(y)
 
   rc <- tibble(
     .diff = character(),

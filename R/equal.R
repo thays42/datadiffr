@@ -23,13 +23,7 @@
 #'   numeric values) and `FALSE` otherwise.
 #' @export
 is_equal <- function(x, y, tol = .Machine$double.eps^0.5) {
-  stopifnot(
-    "tol must be a single non-negative finite number" = is.numeric(tol) &&
-      length(tol) == 1 &&
-      !is.na(tol) &&
-      tol >= 0 &&
-      is.finite(tol)
-  )
+  checkmate::assert_number(tol, lower = 0, finite = TRUE)
   if (length(x) != length(y) && length(x) != 1L && length(y) != 1L) {
     cli::cli_abort(
       "`x` and `y` must be the same length, or either can be length 1."

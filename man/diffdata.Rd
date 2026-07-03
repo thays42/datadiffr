@@ -7,9 +7,9 @@
 diffdata(
   x,
   y,
-  max_differences = 10,
   context_rows = c(3L, 3L),
   context_cols = everything(),
+  max_differences = 10,
   tolerance = .Machine$double.eps^0.5,
   output_file = NULL
 )
@@ -17,12 +17,14 @@ diffdata(
 \arguments{
 \item{x, y}{Data frames to diff.}
 
-\item{max_differences}{Maximum number of differing rows to report.}
-
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}
 
 \item{context_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
+
+\item{max_differences}{Maximum number of differing rows to report. Defaults
+to 10 (unlike \code{\link[=compare_data]{compare_data()}}, which reports everything) to keep
+reports fast to render.}
 
 \item{tolerance}{Numeric tolerance for comparing numeric values.}
 

@@ -65,38 +65,13 @@ test_that("is_equal handles edge cases correctly", {
 })
 
 test_that("is_equal validates tol parameter", {
-  # Negative tolerance should error
-  expect_error(
-    is_equal(5, 5, tol = -1),
-    "tol must be a single non-negative finite number"
-  )
-
-  # Inf tolerance should error
-  expect_error(
-    is_equal(5, 5, tol = Inf),
-    "tol must be a single non-negative finite number"
-  )
-
-  # NA tolerance should error
-  expect_error(
-    is_equal(5, 5, tol = NA),
-    "tol must be a single non-negative finite number"
-  )
-
-  # Vector tolerance should error
-  expect_error(
-    is_equal(5, 5, tol = c(1, 2)),
-    "tol must be a single non-negative finite number"
-  )
-
-  # Non-numeric tolerance should error
-  expect_error(
-    is_equal(5, 5, tol = "0.1"),
-    "tol must be a single non-negative finite number"
-  )
+  expect_error(is_equal(5, 5, tol = -1), "'tol'.*>= 0")
+  expect_error(is_equal(5, 5, tol = Inf), "'tol'.*finite")
+  expect_error(is_equal(5, 5, tol = NA), "'tol'.*NA")
+  expect_error(is_equal(5, 5, tol = c(1, 2)), "'tol'.*length 1")
+  expect_error(is_equal(5, 5, tol = "0.1"), "'tol'.*number")
 
   # Zero tolerance should work
-
   expect_true(is_equal(5, 5, tol = 0))
   expect_false(is_equal(5, 5.0001, tol = 0))
 })
