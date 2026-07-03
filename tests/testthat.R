@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(datadiff)
+library(datadiffr)
 
-test_check("datadiff")
+test_check("datadiffr")

@@ -1,6 +1,6 @@
 ^renv$
 ^renv\.lock$
-^datadiff\.Rproj$
+^datadiffr\.Rproj$
 ^\.Rproj\.user$
 ^\.lintr$
 ^\.cursor$

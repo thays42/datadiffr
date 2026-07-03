@@ -124,7 +124,7 @@ render_diff <- function(diff, output_file = NULL) {
     show_diff() |>
     saveRDS(fp)
 
-  out <- system.file("report.Rmd", package = "datadiff", mustWork = TRUE) |>
+  out <- system.file("report.Rmd", package = "datadiffr", mustWork = TRUE) |>
     rmarkdown::render(
       params = list(data = fp),
       output_dir = tempdir(),

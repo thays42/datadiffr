@@ -1,9 +1,20 @@
-Package: datadiff
-Title: Data Frame Comparison Tools for R
+Package: datadiffr
+Title: Compare Data Frames and Render HTML Diff Reports
 Version: 0.0.0.9000
 Authors@R:
     person("Tyler", "Hays", email = "tyhays@gmail.com", role = c("aut", "cre"))
-Description: Tools to compare and visualize differences between data frames, including row-by-row and column-wise comparison, context-aware diffing, and HTML report generation for data analysis workflows.
+Description: Compare two data frames and visualize the differences as a
+    styled, self-contained 'HTML' report. Differences are reported
+    cell-by-cell with configurable context rows before and after each
+    change, in the style of a unified diff, together with column name and
+    type comparison, group-membership comparison, and tolerance-aware
+    numeric equality that handles 'NA' and infinite values. Rows are
+    matched by position or by key columns. Complements 'waldo' and
+    'diffdf', which target console and text output, and provides an
+    actively maintained alternative to 'compareDF' and the archived
+    'dataCompareR' for report-oriented data comparison workflows.
+URL: https://github.com/thays42/datadiff
+BugReports: https://github.com/thays42/datadiff/issues
 License: MIT + file LICENSE
 Depends: R (>= 4.1)
 Encoding: UTF-8
