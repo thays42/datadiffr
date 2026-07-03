@@ -4,13 +4,14 @@
 \alias{is_equal}
 \title{Vectorized Equality Test}
 \usage{
-is_equal(x, y, tol = .Machine$double.eps^0.5)
+is_equal(x, y, tolerance = .Machine$double.eps^0.5)
 }
 \arguments{
 \item{x, y}{Vectors to compare. Must be the same length, or either can be
 length 1.}
 
-\item{tol}{Numeric tolerance for comparison. Only applies to numeric values.}
+\item{tolerance}{Numeric tolerance for comparison. Only applies to numeric
+values.}
 }
 \value{
 A logical vector the same length as \code{x} and \code{y}, where each element
@@ -28,9 +29,9 @@ Comparison semantics:
 other, but \code{NA} is not equal to \code{NaN}.
 \item Factors are compared by their character values, so factors with
 different level sets can be compared.
-\item Dates and datetimes are compared numerically, so \code{tol} applies on the
+\item Dates and datetimes are compared numerically, so \code{tolerance} applies on the
 underlying scale (days for \code{Date}, seconds for \code{POSIXct}).
-\item Lists are compared element-wise with \code{\link[=identical]{identical()}}; \code{tol} does not apply.
+\item Lists are compared element-wise with \code{\link[=identical]{identical()}}; \code{tolerance} does not apply.
 \item When \code{x} and \code{y} have incompatible types (e.g. numeric vs character),
 every element is \code{FALSE}.
 }

@@ -2,16 +2,16 @@ test_that("is_equal handles numeric values correctly", {
   # Equal numeric values
   expect_true(is_equal(5, 5))
   expect_true(is_equal(5.0, 5.0))
-  expect_true(is_equal(5.0001, 5, tol = 0.001))
+  expect_true(is_equal(5.0001, 5, tolerance = 0.001))
 
   # Different numeric values
   expect_false(is_equal(5, 6))
   expect_false(is_equal(5.0, 5.1))
-  expect_false(is_equal(5.0001, 5, tol = 0.00001))
+  expect_false(is_equal(5.0001, 5, tolerance = 0.00001))
 
   # Custom tolerance
-  expect_true(is_equal(0.999, 1.0, tol = 0.01))
-  expect_false(is_equal(0.999, 1.0, tol = 0.0001))
+  expect_true(is_equal(0.999, 1.0, tolerance = 0.01))
+  expect_false(is_equal(0.999, 1.0, tolerance = 0.0001))
 })
 
 test_that("is_equal handles non-numeric values correctly", {
@@ -61,19 +61,19 @@ test_that("is_equal handles edge cases correctly", {
   # Zero comparisons
   expect_true(is_equal(0, 0))
   expect_true(is_equal(0, -0))
-  expect_true(is_equal(-0.000001, 0, tol = 0.0001))
+  expect_true(is_equal(-0.000001, 0, tolerance = 0.0001))
 })
 
-test_that("is_equal validates tol parameter", {
-  expect_error(is_equal(5, 5, tol = -1), "'tol'.*>= 0")
-  expect_error(is_equal(5, 5, tol = Inf), "'tol'.*finite")
-  expect_error(is_equal(5, 5, tol = NA), "'tol'.*NA")
-  expect_error(is_equal(5, 5, tol = c(1, 2)), "'tol'.*length 1")
-  expect_error(is_equal(5, 5, tol = "0.1"), "'tol'.*number")
+test_that("is_equal validates tolerance parameter", {
+  expect_error(is_equal(5, 5, tolerance = -1), "'tolerance'.*>= 0")
+  expect_error(is_equal(5, 5, tolerance = Inf), "'tolerance'.*finite")
+  expect_error(is_equal(5, 5, tolerance = NA), "'tolerance'.*NA")
+  expect_error(is_equal(5, 5, tolerance = c(1, 2)), "'tolerance'.*length 1")
+  expect_error(is_equal(5, 5, tolerance = "0.1"), "'tolerance'.*number")
 
   # Zero tolerance should work
-  expect_true(is_equal(5, 5, tol = 0))
-  expect_false(is_equal(5, 5.0001, tol = 0))
+  expect_true(is_equal(5, 5, tolerance = 0))
+  expect_false(is_equal(5, 5.0001, tolerance = 0))
 })
 
 test_that("is_equal compares factor vectors with different level sets", {
@@ -122,13 +122,18 @@ test_that("is_equal applies tolerance to dates and datetimes", {
   d <- as.Date("2024-01-01")
   expect_true(is_equal(d, d))
   expect_false(is_equal(d, d + 1))
-  expect_true(is_equal(d, d + 1, tol = 1))
+  expect_true(is_equal(d, d + 1, tolerance = 1))
 
   t1 <- as.POSIXct("2024-01-01 12:00:00", tz = "UTC")
   expect_true(is_equal(t1, t1))
-  expect_true(is_equal(t1, t1 + 0.001, tol = 0.01))
+  expect_true(is_equal(t1, t1 + 0.001, tolerance = 0.01))
   expect_false(is_equal(t1, t1 + 60))
 
   # Date vs datetime is a type mismatch
   expect_false(is_equal(d, t1))
+})
+
+test_that("is_equal uses the tolerance argument name", {
+  expect_named(formals(is_equal), c("x", "y", "tolerance"))
+  expect_true(is_equal(5, 5.0001, tolerance = 0.001))
 })

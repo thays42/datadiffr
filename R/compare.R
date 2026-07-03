@@ -129,7 +129,7 @@ compare_diff <- function(
     mask[, column] <- !is_equal(
       data[[paste0(column, ".__datadiff_x__")]],
       data[[paste0(column, ".__datadiff_y__")]],
-      tol = tolerance
+      tolerance = tolerance
     )
   }
 

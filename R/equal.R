@@ -9,21 +9,22 @@
 #'   other, but `NA` is not equal to `NaN`.
 #' * Factors are compared by their character values, so factors with
 #'   different level sets can be compared.
-#' * Dates and datetimes are compared numerically, so `tol` applies on the
+#' * Dates and datetimes are compared numerically, so `tolerance` applies on the
 #'   underlying scale (days for `Date`, seconds for `POSIXct`).
-#' * Lists are compared element-wise with [identical()]; `tol` does not apply.
+#' * Lists are compared element-wise with [identical()]; `tolerance` does not apply.
 #' * When `x` and `y` have incompatible types (e.g. numeric vs character),
 #'   every element is `FALSE`.
 #'
 #' @param x,y Vectors to compare. Must be the same length, or either can be
 #'   length 1.
-#' @param tol Numeric tolerance for comparison. Only applies to numeric values.
+#' @param tolerance Numeric tolerance for comparison. Only applies to numeric
+#'   values.
 #' @return A logical vector the same length as `x` and `y`, where each element
 #'   is `TRUE` if the corresponding elements are equal (within tolerance for
 #'   numeric values) and `FALSE` otherwise.
 #' @export
-is_equal <- function(x, y, tol = .Machine$double.eps^0.5) {
-  checkmate::assert_number(tol, lower = 0, finite = TRUE)
+is_equal <- function(x, y, tolerance = .Machine$double.eps^0.5) {
+  checkmate::assert_number(tolerance, lower = 0, finite = TRUE)
   if (length(x) != length(y) && length(x) != 1L && length(y) != 1L) {
     cli::cli_abort(
       "`x` and `y` must be the same length, or either can be length 1."
@@ -77,7 +78,7 @@ is_equal <- function(x, y, tol = .Machine$double.eps^0.5) {
         (is.infinite(x) & is.infinite(y) & sign(x) == sign(y)) |
 
         # both finite, within tolerance
-        (!is.na(x) & !is.na(y) & abs(x - y) <= tol)
+        (!is.na(x) & !is.na(y) & abs(x - y) <= tolerance)
     )
   } else {
     (is.na(x) & is.na(y)) | (!is.na(x) & !is.na(y) & x == y)
