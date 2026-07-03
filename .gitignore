@@ -4,3 +4,9 @@
 .Ruserdata
 /doc/
 /Meta/
+
+# Obsidian vault link
+.obsidian-notes
+
+# Local coverage output
+coverage.xml
