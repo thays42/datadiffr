@@ -1,8 +1,8 @@
-test_that("Compare columns returns empty on equal data frames", {
+test_that("compare_columns returns empty on equal data frames", {
   expect_equal(nrow(compare_columns(example_types, example_types)), 0L)
 })
 
-test_that("Compare columns works on different data frames", {
+test_that("compare_columns works on different data frames", {
   a <- example_types |>
     select(-datetimes)
   b <- example_types |>

@@ -8,8 +8,8 @@ example_types <- tibble(
     "another string",
     "apples"
   ),
-  dates = lubridate::as_date("2024-01-01") + 0:3,
-  datetimes = lubridate::as_datetime("2024-01-01 12:00:00") +
+  dates = as.Date("2024-01-01") + 0:3,
+  datetimes = as.POSIXct("2024-01-01 12:00:00", tz = "UTC") +
     c(0, 1200, 2400, 3600)
 )
 

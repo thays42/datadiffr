@@ -13,7 +13,6 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     devtools,
-    lubridate,
     rstudioapi,
     lintr,
     flexdashboard,
@@ -35,5 +34,4 @@ Imports:
     stringr,
     tidyr,
     cli,
-    fs,
     rmarkdown

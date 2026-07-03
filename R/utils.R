@@ -1,16 +1,16 @@
+#' Collapse a column's class vector into a single string
+#' @noRd
 col_class <- function(x) {
   x |>
     class() |>
     paste0(collapse = "/")
 }
 
-if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c(
-    ".join_type",
-    ".diff_type",
-    ".source",
-    ".rn",
-    ".rn.x",
-    ".rn.y"
-  ))
-}
+utils::globalVariables(c(
+  ".row",
+  ".join_type",
+  ".diff_type",
+  ".source",
+  ".rn",
+  ".block"
+))

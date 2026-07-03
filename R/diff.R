@@ -13,7 +13,9 @@ f_ctx <- formattable::formatter(
 
 #' Render HTML diff
 #'
-#' @param diffs Data frame as returned by compare_diff (internal)
+#' @param diffs Data frame as returned by [compare_data()]
+#' @return A formattable/kableExtra HTML table object.
+#' @noRd
 show_diff <- function(diffs) {
   # Identify blocks of rows for formatting the table
   row_groups <- diffs |>
@@ -102,9 +104,10 @@ render_diff <- function(diff, output_file = NULL) {
   }
 
   if (!requireNamespace("flexdashboard", quietly = TRUE)) {
-    stop(
-      "flexdashboard is not installed. Please install it with `install.packages('flexdashboard')`."
-    )
+    cli::cli_abort(c(
+      "{.pkg flexdashboard} must be installed to render diffs.",
+      i = "Install it with {.code install.packages(\"flexdashboard\")}."
+    ))
   }
 
   tempdir(TRUE)
@@ -114,7 +117,7 @@ render_diff <- function(diff, output_file = NULL) {
     show_diff() |>
     saveRDS(fp)
 
-  out <- fs::path_package("datadiff", "report.Rmd") |>
+  out <- system.file("report.Rmd", package = "datadiff", mustWork = TRUE) |>
     rmarkdown::render(
       params = list(data = fp),
       output_dir = tempdir(),

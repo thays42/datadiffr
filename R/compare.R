@@ -15,13 +15,12 @@
 #' always reported as differences.
 #' @return A data frame containing differences between `x` and `y` with the
 #'   following columns:
-#'   \itemize{
-#'     \item `.row` - The row number from the original data frames
-#'     \item `.join_type` - Whether the row is in `"x"`, `"y"`, or `"both"`
-#'     \item `.diff_type` - Whether the row is a `"diff"` or `"context"` row
-#'     \item `.source` - For diff rows, whether this is the `"x"` or `"y"` version;
-#'       `NA` for context rows
-#'   }
+#'   * `.row` - The row number from the original data frames
+#'   * `.join_type` - Whether the row is in `"x"`, `"y"`, or `"both"`
+#'   * `.diff_type` - Whether the row is a `"diff"` or `"context"` row
+#'   * `.source` - For diff rows, whether this is the `"x"` or `"y"` version;
+#'     `NA` for context rows
+#'
 #'   Plus the original data columns (context columns and columns with differences).
 #' @export
 compare_data <- function(
@@ -138,19 +137,17 @@ compare_diff <- function(
   # limit to max differences
   # rows only in x or only in y are always differences, even if their
   # compared values are all NA
-  row_mask <- apply(mask, 1, any) | data$.join_type != "both"
+  row_mask <- rowSums(mask) > 0 | data$.join_type != "both"
   n_differences <- sum(row_mask)
   if (n_differences > max_differences) {
     cli::cli_alert_info(
       "{n_differences} differing row{?s} found. Reporting the first {max_differences} only."
     )
     last_diff <- max(head(which(row_mask), max_differences))
-    row_mask[(last_diff + 1):nrow(data)] <- FALSE
-    col_mask <- apply(mask, 2, function(x) {
-      any(head(x, last_diff))
-    })
+    row_mask[seq_along(row_mask) > last_diff] <- FALSE
+    col_mask <- colSums(mask[seq_len(last_diff), , drop = FALSE]) > 0
   } else {
-    col_mask <- apply(mask, 2, any)
+    col_mask <- colSums(mask) > 0
   }
   diff_columns <- compare_cols[col_mask]
 
@@ -242,13 +239,12 @@ compare_groups <- function(x, y, group_cols) {
 #'
 #' @param x,y Data frames to compare.
 #' @return A data frame with the following columns:
-#'   \itemize{
-#'     \item `.diff` - The type of difference: `"in x only"`, `"in y only"`,
-#'       or `"type conflict"`
-#'     \item `column` - The column name
-#'     \item `x_type` - The column type in `x` (if applicable)
-#'     \item `y_type` - The column type in `y` (if applicable)
-#'   }
+#'   * `.diff` - The type of difference: `"in x only"`, `"in y only"`,
+#'     or `"type conflict"`
+#'   * `column` - The column name
+#'   * `x_type` - The column type in `x` (if applicable)
+#'   * `y_type` - The column type in `y` (if applicable)
+#'
 #'   Returns an empty data frame if there are no differences.
 #' @export
 compare_columns <- function(x, y) {

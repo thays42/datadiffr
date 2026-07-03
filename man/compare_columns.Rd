@@ -18,6 +18,7 @@ or \code{"type conflict"}
 \item \code{x_type} - The column type in \code{x} (if applicable)
 \item \code{y_type} - The column type in \code{y} (if applicable)
 }
+
 Returns an empty data frame if there are no differences.
 }
 \description{

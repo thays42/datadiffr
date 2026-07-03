@@ -37,6 +37,7 @@ following columns:
 \item \code{.source} - For diff rows, whether this is the \code{"x"} or \code{"y"} version;
 \code{NA} for context rows
 }
+
 Plus the original data columns (context columns and columns with differences).
 }
 \description{
