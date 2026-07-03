@@ -25,7 +25,7 @@ a join. When \code{NULL} (the default), rows are matched by position. See
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}
 
-\item{context_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
+\item{context_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
 
 \item{max_differences}{Maximum number of differing rows to report. Defaults
 to 10 (unlike \code{\link[=compare_data]{compare_data()}}, which reports everything) to keep

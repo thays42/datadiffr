@@ -8,7 +8,7 @@
 #'   key columns are always included in the output.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
-#' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
+#' @param context_cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to include as context.
 #' @param max_differences Maximum number of differing rows to report. When
 #'   exceeded, only the first `max_differences` differing rows are returned
 #'   (with a message).
@@ -270,7 +270,7 @@ compare_diff <- function(
 #' Compare groups between two data frames
 #'
 #' @param x,y Data frames to compare
-#' @param group_cols <[`tidy-select`][dplyr_tidy_select]> Columns to use for grouping
+#' @param group_cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to use for grouping
 #' @return A data frame containing the grouping columns and two additional columns,
 #'   `in_x` and `in_y`, which are TRUE if the group values are in the corresponding
 #'   data frame and FALSE otherwise. Records where both `in_x` and `in_y` are TRUE

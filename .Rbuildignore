@@ -10,3 +10,11 @@
 ^scratch$
 ^doc$
 ^Meta$
+^LICENSE\.md$
+^CLAUDE\.md$
+^TODO\.md$
+^docs$
+^coverage\.xml$
+^\.obsidian-notes$
+^\.github$
+^_pkgdown\.yml$

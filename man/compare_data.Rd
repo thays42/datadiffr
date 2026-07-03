@@ -26,7 +26,7 @@ key columns are always included in the output.}
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}
 
-\item{context_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
+\item{context_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
 
 \item{max_differences}{Maximum number of differing rows to report. When
 exceeded, only the first \code{max_differences} differing rows are returned

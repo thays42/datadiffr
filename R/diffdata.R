@@ -9,7 +9,7 @@
 #'   [compare_data()] for details.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
-#' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
+#' @param context_cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to include as context.
 #' @param max_differences Maximum number of differing rows to report. Defaults
 #'   to 10 (unlike [compare_data()], which reports everything) to keep
 #'   reports fast to render.

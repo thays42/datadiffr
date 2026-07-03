@@ -12,5 +12,6 @@ utils::globalVariables(c(
   ".diff_type",
   ".source",
   ".rn",
-  ".block"
+  ".block",
+  ".__datadiff_rn__"
 ))

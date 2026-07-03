@@ -9,7 +9,7 @@ compare_groups(x, y, group_cols)
 \arguments{
 \item{x, y}{Data frames to compare}
 
-\item{group_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Columns to use for grouping}
+\item{group_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to use for grouping}
 }
 \value{
 A data frame containing the grouping columns and two additional columns,
