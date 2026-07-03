@@ -3,144 +3,135 @@
 From the 2026-07-03 project roundup (seven parallel assessments: validation, dataCompareR
 compat, pkgdown, performance, style, code review, competitive positioning).
 
+Status as of 2026-07-03: Phases 0-1 complete; Phase 2 mostly complete.
+R CMD check: 0 errors, 0 warnings, 0 notes. 177 tests passing.
+
 ## Blocking decisions
 
 - [ ] **Rename the package.** `datadiff` was taken on CRAN 2026-06-18 by an unrelated
   ThinkR package (YAML-rule data validation). Candidates: framediff, tablediff,
   diffreport, datadelta, tidydiff — check availability before choosing.
-- [ ] **Decide on key-based matching (`by =` / `keys =`).** Flagged independently by the
-  code review, the positioning research, and the dataCompareR analysis. Rows currently
-  match strictly by row number; one inserted row misaligns everything after it. Every
-  maintained competitor is key-based, and the rCompare() drop-in is dishonest without it.
-  Recommendation: add it before submission.
+- [x] **Key-based matching** — decided in scope and shipped (`by =` on
+  `compare_data()`/`diffdata()`).
 
-## Phase 0 — Hygiene (minutes)
+## Phase 0 — Hygiene — DONE
 
-- [ ] Delete `foo()`/`bar()`/`browser()` debug leftovers from `R/diff.R:133-141`
-  (uncommitted; would trip R CMD check).
-- [ ] Delete or relocate `test_debug.R` and `coverage.xml` at repo root; gitignore as needed.
-- [ ] Fix renv: clear the stale library dir (`~/.cache/R/renv/library/datadiff-82015fc7`)
-  and `renv::restore()` — `later` fails to compile and blocks full restore; `make lint`
-  and `make test` currently fail because of this.
-- [ ] Commit the pending `.lintr` / `.gitignore` changes.
+- [x] Delete `foo()`/`bar()`/`browser()` debug leftovers from R/diff.R.
+- [x] Delete `test_debug.R` and `coverage.xml`; gitignore coverage output.
+- [x] Fix renv: later 1.4.2 would not compile on Fedora 44 glibc; lockfile now pins
+  later 1.4.8. `make test`/`make lint` work again.
+- [x] Commit the pending `.lintr` / `.gitignore` changes.
 
-## Phase 1 — Correctness (all reproduced by the code review)
+## Phase 1 — Correctness — DONE
 
-High severity:
-- [ ] **B1** `diffdata(x, x)` (zero differences) crashes the renderer — `show_diff()` on a
-  0-row diff → `subscript out of bounds` (`R/diff.R:19-29,64-74`).
-- [ ] **B2** Added/deleted rows whose values are all `NA` silently vanish from the diff —
-  mask ignores `.join_type` (`R/compare.R:88-96`). Silent data loss in a diff tool.
-- [ ] **B3** Grouped tibbles: `row_number()` numbers per group → many-to-many join,
-  garbage output (`R/compare.R:51-52`). Fix: `ungroup()` first.
-- [ ] **B4** Factors with different level sets error out (`R/equal.R:34`) — compare
-  `as.character()` for factors.
-- [ ] **B5** A user column named `.rn` is clobbered by the join key and never compared
-  (`R/compare.R:51-52`).
+All reproduced bugs fixed test-first (see git log for details):
+- [x] B1 empty diff crash — `diffdata(x, x)` now reports "No differences found".
+- [x] B2 all-NA added/deleted rows silently dropped — join-type rows always reported.
+- [x] B3 grouped tibbles produced garbage — inputs ungrouped before the join.
+- [x] B4 factors with different level sets errored — compared as character.
+- [x] B5 user column named `.rn` clobbered — internal join key namespaced.
+- [x] B6 list-columns errored — compared element-wise via `identical()`.
+- [x] B7 raw tidyr errors on type conflicts / no shared columns — clear cli errors.
+- [x] B8 `context_cols` rejected bare names — selections resolved via
+  `tidyselect::eval_select()` at entry points (bare forwarding never chains).
+- [x] B9 truncated differences reappeared disguised as context rows.
+- [x] B10 NA vs NaN now compare unequal (documented; matches rCompare semantics).
+- [x] B12 `compare_groups()` guards against `in_x`/`in_y` grouping columns.
+- [x] B13 `is_equal()` honors its vector contract; errors on incompatible lengths.
+- [x] B14 tolerance applies to Date/POSIXct (days/seconds scale).
+- [x] B15 `compare_columns()` stable column order + schema for empty results.
+- [x] B16 `render_diff(output_file=)` errors when the target directory is missing.
+- [x] B17 truncation message uses cli pluralization; "differing rows" semantics
+  documented.
+- [x] Mis-targeted diffdata edge-case test re-pointed at the real diff path.
+- Note: the suspected off-by-one at the old compare.R:106 was unreachable
+  (truncation guarantees a later diff exists), but the indexing was made
+  robust anyway during the rowSums refactor.
 
-Medium (fix or document):
-- [ ] **B7** `compare_data()` with type-conflicted / zero shared columns throws raw tidyr
-  errors — guard like `diffdata()` does.
-- [ ] **B8** `context_cols` rejects bare column names — use `{{ }}` not `all_of()`
-  (`R/compare.R:159`; `compare_groups` does it right).
-- [ ] **B9** Rows truncated by `max_differences` reappear as fake "context" showing only
-  x values (`R/compare.R:106-137`).
-- [ ] **B10** `NA` vs `NaN` compare as equal — decide and document (`R/equal.R:25`).
-  Note: rCompare treats them as unequal.
-- [ ] **B11** `show_diff()` re-runs `is_equal()` with the *default* tolerance, ignoring
-  the user's (`R/diff.R:41-43`) — renderer should reuse the computed mask.
-- [ ] **B12** `compare_groups()` breaks on grouping columns named `in_x`/`in_y`.
-- [ ] **B6, B13-B17** (list-columns, is_equal vector contract, Date/POSIXct tolerance,
-  compare_columns column-order instability, output_file silent copy failure,
-  max_differences counts rows not differences) — see review notes.
-- [ ] Off-by-one at `R/compare.R:106`: `(last_diff + 1):nrow(data)` counts backwards when
-  the last row differs (also independently found by the profiler).
+Remaining test gaps (fine to grow organically):
+- [ ] `show_diff()` output has no direct assertions (only exercised via diffdata).
 
-Test gaps to close alongside:
-- [ ] `test-diffdata.R:71-80` is mis-targeted — accidental int/double type conflict means
-  the context_rows path never runs.
-- [ ] No tests at all for: `max_differences`, nonzero `context_rows` windows,
-  `context_cols`, empty diff through render, vector inputs to `is_equal`, grouped
-  inputs, `output_file` producing a file.
+## Phase 2 — Architecture
 
-## Phase 2 — Architecture (pre-CRAN breaking changes are cheap)
-
-- [ ] **Introduce a classed diff object** (`new_datadiff()`: diff + truncation state +
-  tolerance + column metadata) with `print()`/`summary()`/`render_diff()` methods.
-  Fixes B1/B9/B11 as side effects; gives headless users a console print method;
-  eliminates `diffdata()`'s polymorphic return.
-- [ ] **Key-based matching** in `compare_join()`/`compare_data()`/`diffdata()` (see
-  blocking decision above).
-- [ ] **Migrate validation to checkmate.** Already in the dependency tree transitively
-  (kableExtra → htmlTable); promote to Imports. Collapses stopifnot blocks, closes real
-  gaps (`output_file` unvalidated, `max_differences` sign, `context_rows`
-  integer-ness). Keep hand-rolled: tidy-select args, flexdashboard guard. Consider
-  `makeAssertCollection()` to report all argument errors at once.
-- [ ] Align `compare_data()` vs `diffdata()` argument order and `max_differences`
-  defaults (currently `Inf` vs `10`).
-- [ ] Decompose `compare_diff()` (five jobs, ~90 lines) into `diff_mask()` /
-  `limit_differences()` / `context_indices()`.
-- [ ] Rename `is_equal(tol =)` → `tolerance` for API consistency.
-- [ ] Perf one-liners: `apply(mask, 1, any)` → `rowSums(mask) > 0` (25x on that line,
-  `R/compare.R:99`, also :107/:111); replace row-number hash join with frame padding
-  (55x). Rcpp: evaluated and rejected — not worth it.
-- [ ] Renderer perf: vectorized HTML string construction instead of kableExtra per-row
-  DOM surgery (53s at ~1.5k diff rows today), or cap + warn. Only bites users who
-  raise `max_differences`.
-- [ ] Drop `fs` (single `path_package()` call → `system.file()`) and `glue` (single use;
-  cli interpolates natively) from Imports.
+- [x] **Key-based matching**: `by =` argument on `compare_data()` and `diffdata()`;
+  keys must exist in both frames and be unique per frame; output ordered by key;
+  keys always included in output. Positional matching remains the default.
+- [x] **checkmate validation** across all exported functions; closed gaps
+  (`output_file`, `max_differences >= 0`, `context_rows` integerish/non-negative,
+  `render_diff()` asserts required diff columns).
+- [x] Aligned `compare_data()`/`diffdata()` argument order (formals-equality test
+  pins it). Differing `max_differences` defaults kept and documented (Inf vs 10).
+- [x] Renamed `is_equal(tol =)` → `tolerance`.
+- [x] Perf: `apply()` → `rowSums()`/`colSums()` in the mask reductions.
+- [x] Dropped glue, fs, and lubridate dependencies; added checkmate, rlang,
+  tidyselect (all previously transitive).
+- [ ] **Classed diff object** (`datadiff_diff` subclass of tbl_df) carrying
+  tolerance, truncation state, and diff columns as attributes, with print()
+  and summary() methods. Fixes B11 (renderer re-derives the mask with the
+  DEFAULT tolerance instead of the user's — still open) and gives headless
+  users console output. Design this together with the rCompare compat object.
+- [ ] Renderer perf/redesign: kableExtra per-row DOM surgery is O(n^1.5-2)
+  (53s at ~1.5k diff rows). Rebuild table HTML via vectorized string
+  construction, or cap + warn. Only bites users who raise max_differences.
+- [ ] Decompose `compare_diff()` (~90 lines, five jobs) into diff_mask()/
+  limit_differences()/context_indices() helpers when touching it next.
+- [ ] Optional perf: replace the positional hash join with frame padding
+  (measured 55x on the join step; whole compare path already ~1s at 500k rows).
 
 ## Phase 3 — dataCompareR compatibility
 
-- [ ] **Clean-room reimplementation** (dataCompareR is Apache-2.0, this package is MIT —
-  no code reuse; the contract/field names are fair game). dataCompareR stays in
-  Suggests as a parity oracle for tests.
+- [ ] **Clean-room reimplementation** (dataCompareR is Apache-2.0, this package is
+  MIT — no code reuse; the contract/field names are fair game). dataCompareR
+  stays in Suggests as a parity oracle for tests.
 - [ ] `rCompare()` as a native comparison path (not a wrapper over `diffdata()`),
-  returning class `c("datadiff_compare", "dataCompareRobject")` with the exact field
-  shapes (`meta`, `colMatching`, `rowMatching$matchKeys`, `cleaninginfo`, `mismatches`,
-  `matches`). Faithful defaults inside rCompare (exact equality, error on `mismatches`
-  cap); datadiff-native defaults everywhere else.
+  returning class `c("datadiff_compare", "dataCompareRobject")` with the exact
+  field shapes (`meta`, `colMatching`, `rowMatching$matchKeys`, `cleaninginfo`,
+  `mismatches`, `matches`). Faithful defaults inside rCompare (exact equality,
+  error on `mismatches` cap); datadiff-native defaults everywhere else.
 - [ ] `print()`, `summary()` (~30 fields), `print.summary`, `saveReport()` (on
   rmarkdown), `generateMismatchData()`.
 - [ ] Parity test suite: both packages on shared fixtures, field-by-field.
 - [ ] Bridge: `render_diff()` method for the compat object (the migration carrot).
-- [ ] Vignette: "Migrating from dataCompareR" (outline drafted — why migrate / quick
-  start / compat surface / keyed vs row-order / known differences / extensions /
-  graduating to diffdata / troubleshooting).
+- [ ] Vignette: "Migrating from dataCompareR" (outline in the roundup research —
+  why migrate / quick start / compat surface / keyed vs row-order / known
+  differences / extensions / graduating to diffdata / troubleshooting).
 
 ## Phase 4 — Documentation & site
 
-- [ ] Real README (currently 10 bytes) via `usethis::use_readme_rmd()` — pitch, install,
-  rendered `diffdata()` example with report screenshot, honest comparison table.
+- [ ] Real README (currently 10 bytes) via `usethis::use_readme_rmd()` — pitch,
+  install, rendered `diffdata()` example with report screenshot, honest
+  comparison table.
 - [ ] `@examples` for all exported functions (currently zero anywhere);
   `@examplesIf interactive()` for `render_diff()`.
-- [ ] `@keywords internal`/`@noRd` for `show_diff` (has an Rd but isn't exported);
-  document or `@noRd` `col_class()`; fix stale `globalVariables` (`.rn.x`/`.rn.y`).
-- [ ] "Get started" vignette (VignetteBuilder is declared but vignettes/ doesn't exist).
+- [ ] "Get started" vignette (VignetteBuilder is declared but vignettes/ doesn't
+  exist).
 - [ ] `URL:` + `BugReports:` in DESCRIPTION (`usethis::use_github_links()`).
-- [ ] CI: `usethis::use_github_action("check-standard")` (there is currently zero CI),
+- [ ] CI: `usethis::use_github_action("check-standard")` (currently zero CI),
   optionally test-coverage.
-- [ ] `usethis::use_pkgdown_github_pages()`; curate reference index (High-level API /
-  Comparison / Utilities); remove stale empty `docs/`.
-- [ ] Style nits: `stop()` → `cli::cli_abort()` in `render_diff()`; drop redundant
-  `glue()` wrapper; normalize test names; split the diffdata mega-test;
-  `skip_if_not_installed("lubridate")` in the test helper.
+- [ ] `usethis::use_pkgdown_github_pages()`; curate reference index (High-level
+  API / Comparison / Utilities); remove stale empty `docs/`.
+- [x] Style pass: cli_abort in render_diff, @noRd internals, stale
+  globalVariables, markdown Rd bullets, test naming. (lint + air format clean.)
+- [ ] Split remaining test hygiene: diffdata validation mega-test was split;
+  consider `skip_if_not_installed` patterns as Suggests usage grows.
 
 ## Phase 5 — CRAN submission
 
 - [ ] Execute the rename (repo, DESCRIPTION, pkgdown URL).
-- [ ] DESCRIPTION positioning statement naming alternatives (draft exists — complements
-  waldo/diffdf console output and versus/arsenal in-session tables; maintained
-  alternative to compareDF (maintenance mode) and archived dataCompareR for
-  report-oriented comparison).
-- [ ] NEWS.md, version bump, `R CMD check --as-cran` clean, win-builder/rhub, submit.
+- [ ] DESCRIPTION positioning statement naming alternatives (draft from the
+  roundup: complements waldo/diffdf console output and versus/arsenal
+  in-session tables; maintained alternative to compareDF (maintenance mode)
+  and archived dataCompareR for report-oriented comparison).
+- [ ] NEWS.md, version bump, `R CMD check --as-cran` clean, win-builder/rhub,
+  submit.
 
 ## Positioning (settled by research, for reference)
 
-Niche: "the actively maintained package for context-aware, report-quality HTML data
-diffs." Unique among maintained packages: configurable context rows; polished HTML
-report as default output. dataCompareR archived 2026-02, compareDF in maintenance
-mode — the report-oriented lane is open. Honest weaknesses to fix or disclose:
-positional-only matching (fix), refuses to diff on any column difference (consider
-diffing the intersection), no console print (fixed by the classed object), aggressive
-`max_differences = 10` default (document).
+Niche: "the actively maintained package for context-aware, report-quality HTML
+data diffs." Unique among maintained packages: configurable context rows;
+polished HTML report as default output. dataCompareR archived 2026-02,
+compareDF in maintenance mode — the report-oriented lane is open. Honest
+weaknesses to fix or disclose: ~~positional-only matching~~ (fixed: `by =`),
+refuses to diff on any column difference (consider diffing the intersection),
+no console print method (classed object work), aggressive `max_differences = 10`
+default (documented).
