@@ -8,9 +8,11 @@ R CMD check: 0 errors, 0 warnings, 0 notes. 177 tests passing.
 
 ## Blocking decisions
 
-- [ ] **Rename the package.** `datadiff` was taken on CRAN 2026-06-18 by an unrelated
-  ThinkR package (YAML-rule data validation). Candidates: framediff, tablediff,
-  diffreport, datadelta, tidydiff — check availability before choosing.
+- [x] **Rename the package** — renamed to **datadiffr** (chosen 2026-07-03;
+  `datadiff` was taken on CRAN 2026-06-18 by an unrelated ThinkR package).
+  Package-internal rename done. Still user-side: rename the GitHub repo
+  (`gh repo rename datadiffr`) and optionally the local directory, then
+  update DESCRIPTION URL/BugReports to the new slug.
 - [x] **Key-based matching** — decided in scope and shipped (`by =` on
   `compare_data()`/`diffdata()`).
 
@@ -117,11 +119,10 @@ Remaining test gaps (fine to grow organically):
 
 ## Phase 5 — CRAN submission
 
-- [ ] Execute the rename (repo, DESCRIPTION, pkgdown URL).
-- [ ] DESCRIPTION positioning statement naming alternatives (draft from the
-  roundup: complements waldo/diffdf console output and versus/arsenal
-  in-session tables; maintained alternative to compareDF (maintenance mode)
-  and archived dataCompareR for report-oriented comparison).
+- [x] Execute the package rename (repo rename still user-side; pkgdown URL
+  follows Phase 4).
+- [x] DESCRIPTION positioning statement naming alternatives, Title-Case
+  title, URL/BugReports.
 - [ ] NEWS.md, version bump, `R CMD check --as-cran` clean, win-builder/rhub,
   submit.
 
