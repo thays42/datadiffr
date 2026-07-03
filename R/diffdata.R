@@ -4,7 +4,7 @@
 #' an HTML report in the RStudio viewer or browser.
 #'
 #' @param x,y Data frames to diff.
-#' @param max_differences Maximum number of differences to return.
+#' @param max_differences Maximum number of differing rows to report.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
 #' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
@@ -41,6 +41,12 @@ diffdata <- function(
   max_differences <- as.integer(max_differences)
   context_rows <- as.integer(context_rows)
 
+  # resolve the tidy-select expression against x; selections do not survive
+  # bare forwarding between functions
+  context_cols <- names(
+    tidyselect::eval_select(rlang::enquo(context_cols), data = x)
+  )
+
   col_diff <- compare_columns(x, y)
   if (nrow(col_diff) > 0) {
     cli::cli_alert_danger("Cannot diff data with column differences.")
@@ -51,10 +57,15 @@ diffdata <- function(
     x,
     y,
     context_rows = context_rows,
-    context_cols = context_cols,
+    context_cols = all_of(context_cols),
     max_differences = max_differences,
     tolerance = tolerance
   )
+
+  if (nrow(data_diff) == 0) {
+    cli::cli_alert_success("No differences found.")
+    return(invisible(data_diff))
+  }
 
   render_diff(data_diff, output_file = output_file)
 

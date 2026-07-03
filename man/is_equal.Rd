@@ -7,9 +7,10 @@
 is_equal(x, y, tol = .Machine$double.eps^0.5)
 }
 \arguments{
-\item{x, y}{Vectors to compare.}
+\item{x, y}{Vectors to compare. Must be the same length, or either can be
+length 1.}
 
-\item{tol}{Numeric tolerance for comparison. Only applies to numeric vectors.}
+\item{tol}{Numeric tolerance for comparison. Only applies to numeric values.}
 }
 \value{
 A logical vector the same length as \code{x} and \code{y}, where each element
@@ -19,4 +20,18 @@ numeric values) and \code{FALSE} otherwise.
 \description{
 Element-wise equality comparison that handles \code{NA} and \code{Inf} values correctly,
 and supports numeric tolerance for floating-point comparisons.
+}
+\details{
+Comparison semantics:
+\itemize{
+\item \code{NA} values are equal to each other, and \code{NaN} values are equal to each
+other, but \code{NA} is not equal to \code{NaN}.
+\item Factors are compared by their character values, so factors with
+different level sets can be compared.
+\item Dates and datetimes are compared numerically, so \code{tol} applies on the
+underlying scale (days for \code{Date}, seconds for \code{POSIXct}).
+\item Lists are compared element-wise with \code{\link[=identical]{identical()}}; \code{tol} does not apply.
+\item When \code{x} and \code{y} have incompatible types (e.g. numeric vs character),
+every element is \code{FALSE}.
+}
 }

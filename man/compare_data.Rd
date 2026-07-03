@@ -21,7 +21,9 @@ rows to include before and after a difference row.}
 
 \item{context_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Columns to include as context.}
 
-\item{max_differences}{Maximum number of differences to return.}
+\item{max_differences}{Maximum number of differing rows to report. When
+exceeded, only the first \code{max_differences} differing rows are returned
+(with a message).}
 
 \item{tolerance}{Numeric tolerance for comparing numeric values.}
 }
@@ -39,4 +41,10 @@ Plus the original data columns (context columns and columns with differences).
 }
 \description{
 Compare two data frames
+}
+\details{
+Rows are matched by position (row number). \code{x} and \code{y} must share at
+least one column, and shared columns must have compatible types;
+otherwise an error is thrown. Rows present in only one data frame are
+always reported as differences.
 }

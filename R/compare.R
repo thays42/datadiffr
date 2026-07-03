@@ -4,8 +4,15 @@
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
 #' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
-#' @param max_differences Maximum number of differences to return.
+#' @param max_differences Maximum number of differing rows to report. When
+#'   exceeded, only the first `max_differences` differing rows are returned
+#'   (with a message).
 #' @param tolerance Numeric tolerance for comparing numeric values.
+#' @details
+#' Rows are matched by position (row number). `x` and `y` must share at
+#' least one column, and shared columns must have compatible types;
+#' otherwise an error is thrown. Rows present in only one data frame are
+#' always reported as differences.
 #' @return A data frame containing differences between `x` and `y` with the
 #'   following columns:
 #'   \itemize{
@@ -37,6 +44,34 @@ compare_data <- function(
     "tolerance must be non-negative" = tolerance >= 0
   )
 
+  if (length(intersect(names(x), names(y))) == 0) {
+    cli::cli_abort("`x` and `y` have no columns in common.")
+  }
+  col_diff <- compare_columns(x, y)
+  conflicts <- col_diff[col_diff$.diff == "type conflict", ]
+  if (nrow(conflicts) > 0) {
+    cli::cli_abort(c(
+      "`x` and `y` have column type conflicts.",
+      set_names(
+        paste0(
+          conflicts$column,
+          ": ",
+          conflicts$x_type,
+          " vs ",
+          conflicts$y_type
+        ),
+        rep("x", nrow(conflicts))
+      )
+    ))
+  }
+
+  # resolve the tidy-select expression against x so it can be passed as
+  # plain column names; selections do not survive bare forwarding between
+  # functions
+  context_cols <- names(
+    tidyselect::eval_select(rlang::enquo(context_cols), data = x)
+  )
+
   compare_join(x, y) |>
     compare_diff(
       context_rows = context_rows,
@@ -48,33 +83,38 @@ compare_data <- function(
 
 compare_join <- function(x, y) {
   full_join(
-    x = mutate(x, .rn = row_number()),
-    y = mutate(y, .rn = row_number()),
-    by = join_by(.rn),
+    x = mutate(ungroup(x), .__datadiff_rn__ = row_number()),
+    y = mutate(ungroup(y), .__datadiff_rn__ = row_number()),
+    by = join_by(.__datadiff_rn__),
     suffix = c(".__datadiff_x__", ".__datadiff_y__"),
     keep = TRUE
   ) |>
     mutate(
       .row = coalesce(
-        .data[[".rn.__datadiff_x__"]],
-        .data[[".rn.__datadiff_y__"]]
+        .data[[".__datadiff_rn__.__datadiff_x__"]],
+        .data[[".__datadiff_rn__.__datadiff_y__"]]
       ),
       .join_type = case_when(
-        !is.na(.data[[".rn.__datadiff_x__"]]) &
-          !is.na(.data[[".rn.__datadiff_y__"]]) ~
+        !is.na(.data[[".__datadiff_rn__.__datadiff_x__"]]) &
+          !is.na(.data[[".__datadiff_rn__.__datadiff_y__"]]) ~
           "both",
-        !is.na(.data[[".rn.__datadiff_x__"]]) ~ "x",
-        !is.na(.data[[".rn.__datadiff_y__"]]) ~ "y"
+        !is.na(.data[[".__datadiff_rn__.__datadiff_x__"]]) ~ "x",
+        !is.na(.data[[".__datadiff_rn__.__datadiff_y__"]]) ~ "y"
       ),
       .before = everything()
     ) |>
-    select(-all_of(c(".rn.__datadiff_x__", ".rn.__datadiff_y__")))
+    select(
+      -all_of(c(
+        ".__datadiff_rn__.__datadiff_x__",
+        ".__datadiff_rn__.__datadiff_y__"
+      ))
+    )
 }
 
 compare_diff <- function(
   data,
   context_rows = c(3L, 3L),
-  context_cols = everything(),
+  context_cols = character(),
   max_differences = Inf,
   tolerance = .Machine$double.eps^0.5
 ) {
@@ -96,12 +136,14 @@ compare_diff <- function(
   }
 
   # limit to max differences
-  row_mask <- apply(mask, 1, any)
+  # rows only in x or only in y are always differences, even if their
+  # compared values are all NA
+  row_mask <- apply(mask, 1, any) | data$.join_type != "both"
   n_differences <- sum(row_mask)
   if (n_differences > max_differences) {
-    cli::cli_alert_info(glue(
-      "{n_differences} differences detected. Reporting the first {max_differences} differences only."
-    ))
+    cli::cli_alert_info(
+      "{n_differences} differing row{?s} found. Reporting the first {max_differences} only."
+    )
     last_diff <- max(head(which(row_mask), max_differences))
     row_mask[(last_diff + 1):nrow(data)] <- FALSE
     col_mask <- apply(mask, 2, function(x) {
@@ -177,7 +219,13 @@ compare_groups <- function(x, y, group_cols) {
     "y must be a data frame" = is.data.frame(y)
   )
 
-  x_groups <- x |> select({{ group_cols }}) |> distinct() |> mutate(in_x = TRUE)
+  x_groups <- x |> select({{ group_cols }}) |> distinct()
+  if (any(c("in_x", "in_y") %in% names(x_groups))) {
+    cli::cli_abort(
+      "`group_cols` can't include columns named `in_x` or `in_y`."
+    )
+  }
+  x_groups <- mutate(x_groups, in_x = TRUE)
   y_groups <- y |> select({{ group_cols }}) |> distinct() |> mutate(in_y = TRUE)
   join_cols <- setdiff(names(x_groups), "in_x")
 

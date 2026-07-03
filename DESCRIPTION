@@ -11,6 +11,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests:
     testthat (>= 3.0.0),
+    withr,
     devtools,
     lubridate,
     rstudioapi,
@@ -26,12 +27,13 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports:
     dplyr,
+    rlang,
+    tidyselect,
     formattable,
     kableExtra,
     purrr,
     stringr,
     tidyr,
     cli,
-    glue,
     fs,
     rmarkdown

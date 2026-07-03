@@ -90,6 +90,11 @@ show_diff <- function(diffs) {
 #'   provided, or a temporary file path).
 #' @export
 render_diff <- function(diff, output_file = NULL) {
+  if (nrow(diff) == 0) {
+    cli::cli_alert_info("No differences to render.")
+    return(invisible(NULL))
+  }
+
   if (!requireNamespace("flexdashboard", quietly = TRUE)) {
     stop(
       "flexdashboard is not installed. Please install it with `install.packages('flexdashboard')`."

@@ -17,7 +17,7 @@ diffdata(
 \arguments{
 \item{x, y}{Data frames to diff.}
 
-\item{max_differences}{Maximum number of differences to return.}
+\item{max_differences}{Maximum number of differing rows to report.}
 
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}

@@ -289,3 +289,84 @@ test_that("compare_join handles columns ending in .x or .y", {
   expect_true("value.x.__datadiff_y__" %in% names(result))
   expect_true("value.y.__datadiff_y__" %in% names(result))
 })
+
+test_that("compare_data reports added/deleted rows whose values are all NA", {
+  x <- tibble(a = c(1, NA))
+  y <- tibble(a = 1)
+
+  result <- compare_data(x, y, context_rows = c(0L, 0L))
+
+  expect_equal(result$.row, 2)
+  expect_equal(result$.join_type, "x")
+  expect_equal(result$.diff_type, "diff")
+})
+
+test_that("compare_data handles grouped data frames", {
+  x <- tibble(g = c("a", "a", "b", "b"), v = 1:4) |> group_by(g)
+  y <- tibble(g = c("a", "a", "b", "b"), v = c(1L, 9L, 3L, 4L)) |> group_by(g)
+
+  result <- compare_data(x, y, context_rows = c(0L, 0L))
+
+  expect_equal(unique(result$.row), 2)
+  expect_equal(nrow(result), 2)
+})
+
+test_that("compare_data compares a user column named .rn", {
+  x <- tibble(.rn = c(100, 200), a = 1:2)
+  y <- tibble(.rn = c(100, 999), a = 1:2)
+
+  result <- compare_data(x, y, context_rows = c(0L, 0L))
+
+  expect_equal(unique(result$.row), 2)
+  expect_true(".rn" %in% names(result))
+  expect_setequal(result$.rn, c(200, 999))
+})
+
+test_that("compare_data errors clearly on type-conflicted columns", {
+  x <- tibble(a = 1:3)
+  y <- tibble(a = c("1", "x", "3"))
+
+  expect_error(compare_data(x, y), "type")
+})
+
+test_that("compare_data errors clearly with no columns in common", {
+  expect_error(compare_data(tibble(a = 1:2), tibble(b = 1:2)), "common")
+})
+
+test_that("compare_data accepts bare column names for context_cols", {
+  x <- tibble(id = 1:3, a = c(1, 5, 3))
+  y <- tibble(id = 1:3, a = c(1, 2, 3))
+
+  result <- compare_data(x, y, context_rows = c(0L, 0L), context_cols = id)
+
+  expect_named(
+    result,
+    c(".row", ".join_type", ".diff_type", ".source", "id", "a")
+  )
+
+  result_helper <- compare_data(
+    x,
+    y,
+    context_rows = c(0L, 0L),
+    context_cols = starts_with("i")
+  )
+  expect_true("id" %in% names(result_helper))
+})
+
+test_that("compare_data limits output with max_differences", {
+  x <- tibble(a = 1:4)
+  y <- tibble(a = c(9L, 2L, 8L, 7L))
+
+  expect_message(
+    result <- compare_data(x, y, context_rows = c(0L, 0L), max_differences = 2),
+    "3 differing rows"
+  )
+  expect_equal(unique(result$.row), c(1, 3))
+})
+
+test_that("compare_groups rejects grouping columns named in_x or in_y", {
+  x <- tibble(in_x = 1:2)
+  y <- tibble(in_x = 2:3)
+
+  expect_error(compare_groups(x, y, in_x), "in_x")
+})

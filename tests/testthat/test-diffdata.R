@@ -67,15 +67,40 @@ test_that("diffdata handles edge cases", {
   df_min2 <- tibble(a = 2)
   expect_no_error(diffdata(df_min1, df_min2))
 
-  # Test with integer context_rows
+  # Test with integer context_rows through the diff path
   df1 <- tibble(a = 1:5, b = letters[1:5])
-  df2 <- tibble(a = c(1:4, 6), b = letters[1:5])
-  expect_message(
-    diffdata(df1, df2, context_rows = c(0L, 0L)),
-    "Cannot diff data with column differences."
-  )
-  expect_message(
-    diffdata(df1, df2, context_rows = c(10L, 5L)),
-    "Cannot diff data with column differences."
-  )
+  df2 <- tibble(a = c(1:4, 6L), b = letters[1:5])
+  result <- diffdata(df1, df2, context_rows = c(0L, 0L))
+  expect_equal(unique(result$.row), 5)
+
+  result_ctx <- diffdata(df1, df2, context_rows = c(10L, 5L))
+  expect_equal(sort(unique(result_ctx$.row)), 1:5)
+})
+
+test_that("diffdata reports no differences for identical data frames", {
+  df <- tibble(a = 1:3, b = letters[1:3])
+
+  expect_message(result <- diffdata(df, df), "[Nn]o differences")
+  expect_equal(nrow(result), 0)
+})
+
+test_that("render_diff handles an empty diff without error", {
+  df <- tibble(a = 1:3)
+  empty <- compare_data(df, df)
+
+  expect_message(result <- render_diff(empty), "[Nn]o differences")
+  expect_null(result)
+})
+
+test_that("diffdata writes output_file and passes bare context_cols through", {
+  skip_if_not(rmarkdown::pandoc_available(), "pandoc not available")
+
+  x <- tibble(id = 1:3, a = c(1, 5, 3))
+  y <- tibble(id = 1:3, a = c(1, 2, 3))
+  out <- withr::local_tempfile(fileext = ".html")
+
+  result <- diffdata(x, y, context_cols = id, output_file = out)
+
+  expect_true(file.exists(out))
+  expect_true("id" %in% names(result))
 })
