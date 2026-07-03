@@ -7,6 +7,7 @@
 diffdata(
   x,
   y,
+  by = NULL,
   context_rows = c(3L, 3L),
   context_cols = everything(),
   max_differences = 10,
@@ -16,6 +17,10 @@ diffdata(
 }
 \arguments{
 \item{x, y}{Data frames to diff.}
+
+\item{by}{Optional character vector of key columns to match rows on, like
+a join. When \code{NULL} (the default), rows are matched by position. See
+\code{\link[=compare_data]{compare_data()}} for details.}
 
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}

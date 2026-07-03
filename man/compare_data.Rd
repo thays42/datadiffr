@@ -7,6 +7,7 @@
 compare_data(
   x,
   y,
+  by = NULL,
   context_rows = c(3L, 3L),
   context_cols = everything(),
   max_differences = Inf,
@@ -15,6 +16,12 @@ compare_data(
 }
 \arguments{
 \item{x, y}{Data frames to compare.}
+
+\item{by}{Optional character vector of key columns to match rows on, like
+a join. Key columns must exist in both data frames and uniquely identify
+rows in each. When \code{NULL} (the default), rows are matched by position
+(row number). With \code{by}, the output is ordered by the key columns and
+key columns are always included in the output.}
 
 \item{context_rows}{Integer vector of length two indicating the number of context
 rows to include before and after a difference row.}
@@ -44,8 +51,8 @@ Plus the original data columns (context columns and columns with differences).
 Compare two data frames
 }
 \details{
-Rows are matched by position (row number). \code{x} and \code{y} must share at
-least one column, and shared columns must have compatible types;
-otherwise an error is thrown. Rows present in only one data frame are
-always reported as differences.
+Rows are matched by position (row number), or by key columns when \code{by}
+is given. \code{x} and \code{y} must share at least one column, and shared columns
+must have compatible types; otherwise an error is thrown. Rows present
+in only one data frame are always reported as differences.
 }

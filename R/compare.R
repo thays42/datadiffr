@@ -1,6 +1,11 @@
 #' Compare two data frames
 #'
 #' @param x,y Data frames to compare.
+#' @param by Optional character vector of key columns to match rows on, like
+#'   a join. Key columns must exist in both data frames and uniquely identify
+#'   rows in each. When `NULL` (the default), rows are matched by position
+#'   (row number). With `by`, the output is ordered by the key columns and
+#'   key columns are always included in the output.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
 #' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
@@ -9,10 +14,10 @@
 #'   (with a message).
 #' @param tolerance Numeric tolerance for comparing numeric values.
 #' @details
-#' Rows are matched by position (row number). `x` and `y` must share at
-#' least one column, and shared columns must have compatible types;
-#' otherwise an error is thrown. Rows present in only one data frame are
-#' always reported as differences.
+#' Rows are matched by position (row number), or by key columns when `by`
+#' is given. `x` and `y` must share at least one column, and shared columns
+#' must have compatible types; otherwise an error is thrown. Rows present
+#' in only one data frame are always reported as differences.
 #' @return A data frame containing differences between `x` and `y` with the
 #'   following columns:
 #'   * `.row` - The row number from the original data frames
@@ -26,6 +31,7 @@
 compare_data <- function(
   x,
   y,
+  by = NULL,
   context_rows = c(3L, 3L),
   context_cols = everything(),
   max_differences = Inf,
@@ -33,6 +39,17 @@ compare_data <- function(
 ) {
   checkmate::assert_data_frame(x)
   checkmate::assert_data_frame(y)
+  checkmate::assert_character(
+    by,
+    min.len = 1,
+    any.missing = FALSE,
+    unique = TRUE,
+    null.ok = TRUE
+  )
+  if (!is.null(by)) {
+    checkmate::assert_subset(by, names(x))
+    checkmate::assert_subset(by, names(y))
+  }
   checkmate::assert_integerish(
     context_rows,
     len = 2,
@@ -69,8 +86,12 @@ compare_data <- function(
   context_cols <- names(
     tidyselect::eval_select(rlang::enquo(context_cols), data = x)
   )
+  if (!is.null(by)) {
+    # key columns identify rows in the report, so always include them
+    context_cols <- union(by, context_cols)
+  }
 
-  compare_join(x, y) |>
+  compare_join(x, y, by = by) |>
     compare_diff(
       context_rows = context_rows,
       context_cols = context_cols,
@@ -79,7 +100,15 @@ compare_data <- function(
     )
 }
 
-compare_join <- function(x, y) {
+compare_join <- function(x, y, by = NULL) {
+  if (is.null(by)) {
+    compare_join_positional(x, y)
+  } else {
+    compare_join_keyed(x, y, by)
+  }
+}
+
+compare_join_positional <- function(x, y) {
   full_join(
     x = mutate(ungroup(x), .__datadiff_rn__ = row_number()),
     y = mutate(ungroup(y), .__datadiff_rn__ = row_number()),
@@ -107,6 +136,35 @@ compare_join <- function(x, y) {
         ".__datadiff_rn__.__datadiff_y__"
       ))
     )
+}
+
+compare_join_keyed <- function(x, y, by) {
+  if (anyDuplicated(x[by]) > 0) {
+    cli::cli_abort("`by` columns must uniquely identify rows in `x`.")
+  }
+  if (anyDuplicated(y[by]) > 0) {
+    cli::cli_abort("`by` columns must uniquely identify rows in `y`.")
+  }
+
+  full_join(
+    x = mutate(ungroup(x), .__datadiff_in_x__ = TRUE),
+    y = mutate(ungroup(y), .__datadiff_in_y__ = TRUE),
+    by = by,
+    suffix = c(".__datadiff_x__", ".__datadiff_y__")
+  ) |>
+    arrange(pick(all_of(by))) |>
+    mutate(
+      .row = row_number(),
+      .join_type = case_when(
+        !is.na(.data$.__datadiff_in_x__) &
+          !is.na(.data$.__datadiff_in_y__) ~
+          "both",
+        !is.na(.data$.__datadiff_in_x__) ~ "x",
+        .default = "y"
+      ),
+      .before = everything()
+    ) |>
+    select(-all_of(c(".__datadiff_in_x__", ".__datadiff_in_y__")))
 }
 
 compare_diff <- function(
@@ -137,6 +195,7 @@ compare_diff <- function(
   # rows only in x or only in y are always differences, even if their
   # compared values are all NA
   row_mask <- rowSums(mask) > 0 | data$.join_type != "both"
+  all_diff_rows <- which(row_mask)
   n_differences <- sum(row_mask)
   if (n_differences > max_differences) {
     cli::cli_alert_info(
@@ -164,7 +223,9 @@ compare_diff <- function(
     sequence(ctx_fwd, from = diff_indices, by = 1L),
     nrow(data)
   )] <- TRUE
-  context_mask[which(row_mask)] <- FALSE
+  # exclude every differing row, including rows hidden by max_differences;
+  # a truncated difference must not reappear disguised as a context row
+  context_mask[all_diff_rows] <- FALSE
 
   # pull context rows
   # context rows are pulled from the `x` data frame
@@ -175,18 +236,24 @@ compare_diff <- function(
     rename_with(\(x) str_remove(x, "\\.__datadiff_x__$"))
 
   # pull data rows
-  data[row_mask, ] |>
-    # pivot so that `x` rows stacked on `y` rows.
-    pivot_longer(
-      ends_with(".__datadiff_x__") | ends_with(".__datadiff_y__"),
-      names_to = c(".value", ".source"),
-      names_pattern = "^(.+)\\.__datadiff_(x|y)__$"
-    ) |>
+  diff_data <- data[row_mask, ]
+  if (length(compare_cols) == 0) {
+    # only key columns are shared, so differing rows exist in one frame only
+    diff_data <- mutate(diff_data, .source = .data$.join_type)
+  } else {
+    diff_data <- diff_data |>
+      # pivot so that `x` rows stacked on `y` rows.
+      pivot_longer(
+        ends_with(".__datadiff_x__") | ends_with(".__datadiff_y__"),
+        names_to = c(".value", ".source"),
+        names_pattern = "^(.+)\\.__datadiff_(x|y)__$"
+      ) |>
+      # remove empty rows representing rows in x not in y or vice versa
+      filter(.data$.join_type == "both" | .data$.join_type == .data$.source)
+  }
 
-    # remove empty rows representing rows in x not in y or vice versa
-    filter(.data$.join_type == "both" | .data$.join_type == .data$.source) |>
+  diff_data |>
     mutate(.diff_type = "diff") |>
-
     # add context rows, arrange columns and rows for output
     bind_rows(context_data) |>
     select(

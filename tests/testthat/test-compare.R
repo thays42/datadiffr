@@ -385,3 +385,75 @@ test_that("compare_columns returns a stable column order", {
   expect_named(compare_columns(x, x), c(".diff", "column", "x_type", "y_type"))
   expect_equal(nrow(compare_columns(x, x)), 0L)
 })
+
+test_that("truncation does not disguise hidden differences as context", {
+  x <- tibble(a = 1:6)
+  y <- tibble(a = rep(9L, 6))
+
+  expect_message(
+    result <- compare_data(
+      x,
+      y,
+      context_rows = c(0L, 2L),
+      max_differences = 1
+    )
+  )
+
+  # rows 2-6 differ but are truncated away; they must not reappear as
+  # context rows showing only x values
+  expect_equal(unique(result$.row), 1)
+})
+
+test_that("compare_data matches rows by key columns", {
+  x <- tibble(id = c(1, 2, 3), v = c("a", "b", "c"))
+  y <- tibble(id = c(2, 3, 4), v = c("b", "XX", "d"))
+
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+
+  # id 1 only in x, id 4 only in y, id 3 differs, id 2 matches
+  expect_setequal(result$id, c(1, 3, 4))
+  expect_equal(result$.join_type[result$id == 1], "x")
+  expect_equal(result$.join_type[result$id == 4], "y")
+  expect_setequal(result$v[result$id == 3], c("c", "XX"))
+})
+
+test_that("key matching is not misaligned by an inserted row", {
+  x <- tibble(id = c(1, 2, 3), v = c("a", "b", "c"))
+  y <- tibble(id = c(1, 1.5, 2, 3), v = c("a", "z", "b", "c"))
+
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+
+  # only the inserted row differs
+  expect_equal(result$id, 1.5)
+  expect_equal(result$.join_type, "y")
+})
+
+test_that("compare_data supports multiple key columns", {
+  x <- tibble(g = c("a", "a", "b"), i = c(1, 2, 1), v = 1:3)
+  y <- tibble(g = c("a", "a", "b"), i = c(1, 2, 1), v = c(1L, 9L, 3L))
+
+  result <- compare_data(x, y, by = c("g", "i"), context_rows = c(0L, 0L))
+
+  expect_equal(unique(result$g), "a")
+  expect_equal(unique(result$i), 2)
+})
+
+test_that("compare_data validates key columns", {
+  x <- tibble(id = c(1, 1), v = 1:2)
+  y <- tibble(id = c(1, 2), v = 1:2)
+
+  expect_error(compare_data(x, y, by = "id"), "unique")
+  expect_error(compare_data(y, x, by = "id"), "unique")
+  expect_error(compare_data(y, y, by = "nope"), "subset")
+  expect_error(compare_data(y, y, by = 1), "character")
+})
+
+test_that("compare_data works when only key columns are shared", {
+  x <- tibble(id = 1:2)
+  y <- tibble(id = 2:3)
+
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+
+  expect_setequal(result$id, c(1, 3))
+  expect_setequal(result$.join_type, c("x", "y"))
+})

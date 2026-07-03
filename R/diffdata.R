@@ -4,6 +4,9 @@
 #' an HTML report in the RStudio viewer or browser.
 #'
 #' @param x,y Data frames to diff.
+#' @param by Optional character vector of key columns to match rows on, like
+#'   a join. When `NULL` (the default), rows are matched by position. See
+#'   [compare_data()] for details.
 #' @param context_rows Integer vector of length two indicating the number of context
 #'   rows to include before and after a difference row.
 #' @param context_cols <[`tidy-select`][dplyr_tidy_select]> Columns to include as context.
@@ -20,6 +23,7 @@
 diffdata <- function(
   x,
   y,
+  by = NULL,
   context_rows = c(3L, 3L),
   context_cols = everything(),
   max_differences = 10,
@@ -56,6 +60,7 @@ diffdata <- function(
   data_diff <- compare_data(
     x,
     y,
+    by = by,
     context_rows = context_rows,
     context_cols = all_of(context_cols),
     max_differences = max_differences,
