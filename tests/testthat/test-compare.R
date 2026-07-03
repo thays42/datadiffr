@@ -370,3 +370,18 @@ test_that("compare_groups rejects grouping columns named in_x or in_y", {
 
   expect_error(compare_groups(x, y, in_x), "in_x")
 })
+
+test_that("compare_columns returns a stable column order", {
+  x <- tibble(a = 1)
+  y <- tibble(a = 1, b = 2)
+
+  # only "in y only" differences
+  expect_named(compare_columns(x, y), c(".diff", "column", "x_type", "y_type"))
+
+  # only "in x only" differences
+  expect_named(compare_columns(y, x), c(".diff", "column", "x_type", "y_type"))
+
+  # no differences: empty but with the same schema
+  expect_named(compare_columns(x, x), c(".diff", "column", "x_type", "y_type"))
+  expect_equal(nrow(compare_columns(x, x)), 0L)
+})

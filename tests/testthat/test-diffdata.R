@@ -104,3 +104,14 @@ test_that("diffdata writes output_file and passes bare context_cols through", {
   expect_true(file.exists(out))
   expect_true("id" %in% names(result))
 })
+
+test_that("render_diff errors when the output_file directory does not exist", {
+  df1 <- tibble(a = 1)
+  df2 <- tibble(a = 2)
+  diff <- compare_data(df1, df2)
+
+  expect_error(
+    render_diff(diff, output_file = "/nonexistent-datadiff-dir/report.html"),
+    "output_file"
+  )
+})

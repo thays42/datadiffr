@@ -95,6 +95,12 @@ render_diff <- function(diff, output_file = NULL) {
     return(invisible(NULL))
   }
 
+  if (!is.null(output_file) && !dir.exists(dirname(output_file))) {
+    cli::cli_abort(
+      "The `output_file` directory {.path {dirname(output_file)}} does not exist."
+    )
+  }
+
   if (!requireNamespace("flexdashboard", quietly = TRUE)) {
     stop(
       "flexdashboard is not installed. Please install it with `install.packages('flexdashboard')`."

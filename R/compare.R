@@ -257,7 +257,12 @@ compare_columns <- function(x, y) {
     "y must be a data frame" = is.data.frame(y)
   )
 
-  rc <- tibble()
+  rc <- tibble(
+    .diff = character(),
+    column = character(),
+    x_type = character(),
+    y_type = character()
+  )
 
   # column names
   x_names <- names(x)
