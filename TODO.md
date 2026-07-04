@@ -80,23 +80,28 @@ Remaining test gaps (fine to grow organically):
 - [ ] Optional perf: replace the positional hash join with frame padding
   (measured 55x on the join step; whole compare path already ~1s at 500k rows).
 
-## Phase 3 — dataCompareR compatibility
+## Phase 3 — dataCompareR compatibility — DONE
 
-- [ ] **Clean-room reimplementation** (dataCompareR is Apache-2.0, this package is
-  MIT — no code reuse; the contract/field names are fair game). dataCompareR
-  stays in Suggests as a parity oracle for tests.
-- [ ] `rCompare()` as a native comparison path (not a wrapper over `diffdata()`),
-  returning class `c("datadiff_compare", "dataCompareRobject")` with the exact
-  field shapes (`meta`, `colMatching`, `rowMatching$matchKeys`, `cleaninginfo`,
-  `mismatches`, `matches`). Faithful defaults inside rCompare (exact equality,
-  error on `mismatches` cap); datadiff-native defaults everywhere else.
-- [ ] `print()`, `summary()` (~30 fields), `print.summary`, `saveReport()` (on
-  rmarkdown), `generateMismatchData()`.
-- [ ] Parity test suite: both packages on shared fixtures, field-by-field.
-- [ ] Bridge: `render_diff()` method for the compat object (the migration carrot).
-- [ ] Vignette: "Migrating from dataCompareR" (outline in the roundup research —
-  why migrate / quick start / compat surface / keyed vs row-order / known
-  differences / extensions / graduating to diffdata / troubleshooting).
+- [x] **Clean-room reimplementation** (dataCompareR is Apache-2.0, this package is
+  MIT — no code reuse; behavior pinned by black-box probes of dataCompareR
+  0.1.4). dataCompareR stays in Suggests as a parity oracle for tests.
+- [x] `rCompare()` native comparison path returning
+  `c("datadiff_compare", "dataCompareRobject")` with the exact field shapes;
+  faithful defaults (exact equality, error on `mismatches` cap) plus a
+  `tolerance =` extension appended after the original arguments. Cleaned
+  frames ride along as an attribute for the render_diff() bridge.
+- [x] `print()`, `summary()` (33 fields, dynamic column names), `print.summary`
+  (markdown report incl. Dropped Rows Details), `saveReport()` (rmarkdown,
+  writes .Rmd/.md/.html), `generateMismatchData()` (keyed and keyless).
+  Documented improvement: detail tables deterministic (sorted by |diff| desc)
+  where dataCompareR sampled.
+- [x] Parity test suite (test-rcompare-parity.R): field-by-field vs the real
+  dataCompareR on shared fixtures, skip_if_not_installed.
+- [x] Bridge: `render_diff()` is now S3 generic with a datadiff_compare method.
+- [x] Vignette: "Migrating from dataCompareR" (vignettes/).
+- Note: local `make check` needs qpdf installed (`sudo dnf install qpdf`) now
+  that the package builds vignettes; without it check reports 1 environmental
+  WARNING. CRAN builders have qpdf.
 
 ## Phase 4 — Documentation & site
 
