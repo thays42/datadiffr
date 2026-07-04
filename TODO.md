@@ -3,12 +3,11 @@
 From the 2026-07-03 project roundup (seven parallel assessments: validation, dataCompareR
 compat, pkgdown, performance, style, code review, competitive positioning).
 
-Status as of 2026-07-04: Phases 0-4 complete (Phase 4 only leaves the optional
-test-hygiene split). GitHub repo renamed to thays42/datadiffr; README,
-@examples, "Get started" vignette, CI + pkgdown workflows, and URL/BugReports
-all shipped. Repo-side step still pending: enable GitHub Pages so pkgdown can
-publish. Next is Phase 5 (CRAN submission). 547 tests passing; R CMD check clean
-except a local qpdf WARNING (CRAN builders have qpdf).
+Status as of 2026-07-04: Phases 0-4 complete. Phase 5 nearly done — version
+0.1.0, NEWS.md, cran-comments.md all written; `R CMD check --as-cran` clean
+(0/0/0); CI green on all 5 platforms; pkgdown site live at
+https://thays42.github.io/datadiffr/. Remaining before submission: win-builder
++ rhub, then submit. 547 tests passing locally.
 
 ## Blocking decisions
 
@@ -158,10 +157,22 @@ Remaining test gaps (fine to grow organically):
 - [x] NEWS.md written (initial-release feature summary) and version bumped
   0.0.0.9000 → 0.1.0. Plain `R CMD check` still clean (0 errors / 0 notes /
   qpdf WARNING only).
-- [ ] `R CMD check --as-cran` clean — expect a "New submission" NOTE and
-  possibly URL/spell-check NOTEs to triage. Needs qpdf installed locally to
-  clear the size-reduction WARNING.
-- [ ] cran-comments.md (document the qpdf note + any --as-cran NOTEs).
+- [x] `R CMD check --as-cran` clean locally — 0 errors / 0 warnings / 0 notes
+  (qpdf installed). The "New submission" NOTE only appears on CRAN's
+  incoming-feasibility step (needs network), and the archived-dataCompareR
+  Suggests NOTE is documented in cran-comments.
+- [x] Spell check set up (inst/WORDLIST, tests/spelling.R, Language: en-US);
+  `spell_check_package()` clean; British spellings switched to American.
+- [x] cran-comments.md — documents "New submission" + archived-dataCompareR
+  Suggests (conditional oracle via skip_if_not_installed).
+- [x] CI is green: R-CMD-check passes on all 5 platforms (ubuntu
+  devel/release/oldrel-1, macOS, Windows); pkgdown builds and the site is live
+  at https://thays42.github.io/datadiffr/. dataCompareR (archived) installed in
+  CI from the CRAN archive; parity tests skip when it can't run against modern
+  dplyr (skip_unless_oracle helper). Note: the legacy "pages build and
+  deployment" occasionally transient-fails ("try again later") since Pages uses
+  the branch source — it self-heals on retrigger; switching Pages to the
+  "GitHub Actions" source would remove it (optional).
 - [ ] win-builder (devel + release) and rhub checks.
 - [ ] Submit to CRAN (`devtools::submit_cran()` or the web form).
 
