@@ -45,3 +45,15 @@ Otherwise, invisibly returns the diff data frame (from \code{\link[=compare_data
 High-level function that compares two data frames and renders the result as
 an HTML report in the RStudio viewer or browser.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
+y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))
+
+# Opens a styled HTML diff report in the RStudio viewer or browser
+diffdata(x, y)
+
+# Or write the report to a file instead of opening it
+diffdata(x, y, output_file = tempfile(fileext = ".html"))
+\dontshow{\}) # examplesIf}
+}

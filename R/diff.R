@@ -101,6 +101,12 @@ add_column_borders <- function(tbl) {
 #'   in the viewer.
 #' @return Invisibly returns the path to the HTML file (either `output_file` if
 #'   provided, or a temporary file path).
+#' @examplesIf interactive()
+#' x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
+#' y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))
+#'
+#' diff <- compare_data(x, y)
+#' render_diff(diff)
 #' @export
 render_diff <- function(diff, output_file = NULL) {
   UseMethod("render_diff")

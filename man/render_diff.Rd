@@ -28,3 +28,12 @@ provided, or a temporary file path).
 Opens the diff as an HTML report in the RStudio viewer (if available) or
 browser. Optionally saves to a file.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
+y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))
+
+diff <- compare_data(x, y)
+render_diff(diff)
+\dontshow{\}) # examplesIf}
+}

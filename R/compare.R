@@ -27,6 +27,18 @@
 #'     `NA` for context rows
 #'
 #'   Plus the original data columns (context columns and columns with differences).
+#' @examples
+#' x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
+#' y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
+#'
+#' # Rows are matched by position by default
+#' compare_data(x, y, context_rows = c(1L, 1L))
+#'
+#' # Match on a key column instead of position
+#' compare_data(x, y, by = "id")
+#'
+#' # A numeric tolerance treats near-equal values as equal
+#' compare_data(x, y, tolerance = 10)
 #' @export
 compare_data <- function(
   x,
@@ -314,6 +326,12 @@ compare_diff <- function(
 #'   `in_x` and `in_y`, which are TRUE if the group values are in the corresponding
 #'   data frame and FALSE otherwise. Records where both `in_x` and `in_y` are TRUE
 #'   are excluded from the output.
+#' @examples
+#' x <- data.frame(team = c("a", "a", "b"), player = 1:3)
+#' y <- data.frame(team = c("a", "b", "c"), player = 4:6)
+#'
+#' # Team values that appear in only one of the frames
+#' compare_groups(x, y, group_cols = team)
 #' @export
 compare_groups <- function(x, y, group_cols) {
   checkmate::assert_data_frame(x)
@@ -349,6 +367,12 @@ compare_groups <- function(x, y, group_cols) {
 #'   * `y_type` - The column type in `y` (if applicable)
 #'
 #'   Returns an empty data frame if there are no differences.
+#' @examples
+#' x <- data.frame(id = 1:3, value = 1:3, extra = letters[1:3])
+#' y <- data.frame(id = 1:3, value = c(1.5, 2.5, 3.5))
+#'
+#' # `value` differs in type (integer vs double) and `extra` is only in x
+#' compare_columns(x, y)
 #' @export
 compare_columns <- function(x, y) {
   checkmate::assert_data_frame(x)

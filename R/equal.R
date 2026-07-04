@@ -22,6 +22,15 @@
 #' @return A logical vector the same length as `x` and `y`, where each element
 #'   is `TRUE` if the corresponding elements are equal (within tolerance for
 #'   numeric values) and `FALSE` otherwise.
+#' @examples
+#' is_equal(c(1, 2, NA), c(1, 5, NA))
+#'
+#' # NA equals NA and NaN equals NaN, but NA does not equal NaN
+#' is_equal(NA, NaN)
+#'
+#' # Tolerance controls how close numeric values must be
+#' is_equal(1, 1.001)
+#' is_equal(1, 1.001, tolerance = 0.01)
 #' @export
 is_equal <- function(x, y, tolerance = .Machine$double.eps^0.5) {
   checkmate::assert_number(tolerance, lower = 0, finite = TRUE)

@@ -24,3 +24,10 @@ Returns an empty data frame if there are no differences.
 \description{
 Compare column metadata between two data frames
 }
+\examples{
+x <- data.frame(id = 1:3, value = 1:3, extra = letters[1:3])
+y <- data.frame(id = 1:3, value = c(1.5, 2.5, 3.5))
+
+# `value` differs in type (integer vs double) and `extra` is only in x
+compare_columns(x, y)
+}

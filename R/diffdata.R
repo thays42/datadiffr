@@ -19,6 +19,15 @@
 #' @return If `x` and `y` have column differences (different names or types),
 #'   returns a visible data frame describing those differences (from [compare_columns()]).
 #'   Otherwise, invisibly returns the diff data frame (from [compare_data()]).
+#' @examplesIf interactive()
+#' x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
+#' y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))
+#'
+#' # Opens a styled HTML diff report in the RStudio viewer or browser
+#' diffdata(x, y)
+#'
+#' # Or write the report to a file instead of opening it
+#' diffdata(x, y, output_file = tempfile(fileext = ".html"))
 #' @export
 diffdata <- function(
   x,

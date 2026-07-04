@@ -20,3 +20,10 @@ are excluded from the output.
 \description{
 Compare groups between two data frames
 }
+\examples{
+x <- data.frame(team = c("a", "a", "b"), player = 1:3)
+y <- data.frame(team = c("a", "b", "c"), player = 4:6)
+
+# Team values that appear in only one of the frames
+compare_groups(x, y, group_cols = team)
+}

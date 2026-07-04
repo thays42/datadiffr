@@ -36,3 +36,13 @@ underlying scale (days for \code{Date}, seconds for \code{POSIXct}).
 every element is \code{FALSE}.
 }
 }
+\examples{
+is_equal(c(1, 2, NA), c(1, 5, NA))
+
+# NA equals NA and NaN equals NaN, but NA does not equal NaN
+is_equal(NA, NaN)
+
+# Tolerance controls how close numeric values must be
+is_equal(1, 1.001)
+is_equal(1, 1.001, tolerance = 0.01)
+}

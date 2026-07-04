@@ -56,3 +56,16 @@ is given. \code{x} and \code{y} must share at least one column, and shared colum
 must have compatible types; otherwise an error is thrown. Rows present
 in only one data frame are always reported as differences.
 }
+\examples{
+x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
+y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
+
+# Rows are matched by position by default
+compare_data(x, y, context_rows = c(1L, 1L))
+
+# Match on a key column instead of position
+compare_data(x, y, by = "id")
+
+# A numeric tolerance treats near-equal values as equal
+compare_data(x, y, tolerance = 10)
+}
