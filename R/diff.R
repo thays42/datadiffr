@@ -92,6 +92,25 @@ show_diff <- function(diffs) {
 #'   provided, or a temporary file path).
 #' @export
 render_diff <- function(diff, output_file = NULL) {
+  UseMethod("render_diff")
+}
+
+#' @rdname render_diff
+#' @export
+render_diff.datadiff_compare <- function(diff, output_file = NULL) {
+  frames <- attr(diff, "cleaned")
+  data_diff <- compare_data(
+    frames$a,
+    frames$b,
+    by = frames$keys,
+    tolerance = attr(diff, "tolerance")
+  )
+  render_diff(data_diff, output_file = output_file)
+}
+
+#' @rdname render_diff
+#' @export
+render_diff.default <- function(diff, output_file = NULL) {
   checkmate::assert_data_frame(diff)
   checkmate::assert_names(
     names(diff),

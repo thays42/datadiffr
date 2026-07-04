@@ -265,3 +265,27 @@ test_that("summary validates mismatchCount", {
   expect_error(summary(cmp, mismatchCount = 0))
   expect_error(summary(cmp, mismatchCount = -1))
 })
+
+test_that("print.summary lists one-sided columns after the match keys line", {
+  out <- capture.output(print(summary(rCompare(rc_a, rc_b, keys = "id"))))
+  expect_match(out, "^Columns only in rc_a: only_a", all = FALSE)
+  expect_match(out, "^Columns only in rc_b: only_b", all = FALSE)
+  expect_match(out, "^Columns in both : CHR, ID, VAL", all = FALSE)
+})
+
+test_that("print.summary renders dropped rows details when rows were dropped", {
+  out <- capture.output(print(summary(rCompare(rc_a, rc_b, keys = "id"))))
+  expect_match(out, "^Dropped Rows Details$", all = FALSE)
+  expect_match(out, "The following rows were dropped from rc_a", all = FALSE)
+  expect_match(out, "The following rows were dropped from rc_b", all = FALSE)
+  # the key tables themselves
+  expect_match(out, "\\| *4\\|", all = FALSE)
+  expect_match(out, "\\| *5\\|", all = FALSE)
+})
+
+test_that("print.summary omits dropped rows details when nothing was dropped", {
+  a <- data.frame(x = 1:2)
+  out <- capture.output(print(summary(rCompare(a, a))))
+  expect_no_match(out, "Dropped Rows Details")
+  expect_no_match(out, "Columns only in")
+})

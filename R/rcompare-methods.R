@@ -280,15 +280,6 @@ print.summary.datadiff_compare <- function(x, ...) {
       x$ncolInAOnly,
       "  "
     ),
-    if (x$ncolInAOnly > 0) {
-      paste0(
-        "Columns only in ",
-        x$datanameA,
-        ": ",
-        paste(x$colsInAOnly, collapse = ", "),
-        "  "
-      )
-    },
     paste0(
       "Number of columns only in ",
       x$datanameB,
@@ -296,15 +287,6 @@ print.summary.datadiff_compare <- function(x, ...) {
       x$ncolInBOnly,
       "  "
     ),
-    if (x$ncolInBOnly > 0) {
-      paste0(
-        "Columns only in ",
-        x$datanameB,
-        ": ",
-        paste(x$colsInBOnly, collapse = ", "),
-        "  "
-      )
-    },
     paste0(
       "Number of columns with a type mismatch: ",
       x$typeMismatchN,
@@ -320,6 +302,34 @@ print.summary.datadiff_compare <- function(x, ...) {
       )
     } else {
       "Match keys : none (rows are compared in order)"
+    },
+    if (x$ncolInAOnly + x$ncolInBOnly > 0) {
+      c(
+        "",
+        if (x$ncolInAOnly > 0) {
+          paste0(
+            "Columns only in ",
+            x$datanameA,
+            ": ",
+            paste(x$colsInAOnly, collapse = ", "),
+            "  "
+          )
+        },
+        if (x$ncolInBOnly > 0) {
+          paste0(
+            "Columns only in ",
+            x$datanameB,
+            ": ",
+            paste(x$colsInBOnly, collapse = ", "),
+            "  "
+          )
+        },
+        paste0(
+          "Columns in both : ",
+          paste(x$colsInBoth, collapse = ", "),
+          "  "
+        )
+      )
     },
     "",
     "",
@@ -395,6 +405,27 @@ print.summary.datadiff_compare <- function(x, ...) {
         paste0("#### Column -  ", v),
         "",
         rc_md_table(x$colMismDetls[[v]])
+      )
+    }
+  }
+  if (x$nrowInAOnly > 0 || x$nrowInBOnly > 0) {
+    md <- c(md, "", "Dropped Rows Details", "====================", "")
+    if (x$nrowInAOnly > 0) {
+      md <- c(
+        md,
+        paste0("The following rows were dropped from ", x$datanameA),
+        "",
+        rc_md_table(x$rowsInAOnly),
+        ""
+      )
+    }
+    if (x$nrowInBOnly > 0) {
+      md <- c(
+        md,
+        paste0("The following rows were dropped from ", x$datanameB),
+        "",
+        rc_md_table(x$rowsInBOnly),
+        ""
       )
     }
   }

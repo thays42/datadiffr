@@ -248,6 +248,9 @@ rCompare <- function(
       matches = structure(match_cols, class = "matches")
     ),
     tolerance = tolerance,
+    # cleaned shared-column frames, kept so render_diff() can rebuild the
+    # full datadiffr diff without re-passing the inputs
+    cleaned = list(a = a, b = b, keys = if (length(keys)) keys else NULL),
     class = c("datadiff_compare", "dataCompareRobject")
   )
 }
