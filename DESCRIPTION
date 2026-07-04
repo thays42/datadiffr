@@ -27,7 +27,6 @@ Suggests:
     rstudioapi,
     lintr,
     flexdashboard,
-    knitr,
     arsenal,
     dataCompareR,
     compareDF,
@@ -38,6 +37,7 @@ Config/testthat/edition: 3
 Imports:
     checkmate,
     dplyr,
+    knitr,
     rlang,
     tidyselect,
     formattable,

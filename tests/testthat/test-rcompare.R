@@ -1,21 +1,7 @@
 # rCompare() is a clean-room reimplementation of the dataCompareR contract.
 # Object shapes and semantics below were pinned empirically against
 # dataCompareR 0.1.4 (see test-rcompare-parity.R for the live oracle tests).
-
-rc_a <- data.frame(
-  id = 1:4,
-  val = c(1, 2, 3, 4),
-  chr = c("a", "b", "c", "d"),
-  only_a = c(TRUE, FALSE, TRUE, FALSE),
-  stringsAsFactors = FALSE
-)
-rc_b <- data.frame(
-  id = c(1L, 2L, 3L, 5L),
-  val = c(1, 2.5, 3, 4),
-  chr = c("a", "B", "c", "e"),
-  only_b = 1:4,
-  stringsAsFactors = FALSE
-)
+# Fixtures rc_a / rc_b come from helper-rcompare.R.
 
 test_that("rCompare returns a classed compatibility object", {
   cmp <- rCompare(rc_a, rc_b, keys = "id")
