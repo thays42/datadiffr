@@ -5,6 +5,28 @@ oracle_rcompare <- function(...) {
   suppressMessages(suppressWarnings(dataCompareR::rCompare(...)))
 }
 
+# dataCompareR was archived from CRAN and calls dplyr functions (e.g.
+# select_()) that are defunct in current dplyr, so an installed copy may no
+# longer run. Skip parity checks unless the oracle is both installed and still
+# functional against the dplyr on this machine.
+skip_unless_oracle <- function() {
+  skip_if_not_installed("dataCompareR")
+  ok <- tryCatch(
+    {
+      oracle_rcompare(
+        data.frame(id = 1:2, v = c(1, 2)),
+        data.frame(id = 1:2, v = c(1, 3)),
+        keys = "id"
+      )
+      TRUE
+    },
+    error = function(e) FALSE
+  )
+  if (!ok) {
+    skip("dataCompareR does not run against the installed dplyr")
+  }
+}
+
 # empty per-side key vectors: the oracle's incidental types (e.g. logical(0))
 # are not part of the contract, only their emptiness is
 normalize_side <- function(x) {
@@ -65,7 +87,7 @@ expect_parity <- function(dfA, dfB, ...) {
 }
 
 test_that("parity: keyed comparison with one-sided columns and rows", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   dfa <- data.frame(
     id = 1:4,
     val = c(1, 2, 3, 4),
@@ -82,7 +104,7 @@ test_that("parity: keyed comparison with one-sided columns and rows", {
 })
 
 test_that("parity: keyless comparison with truncation", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   expect_parity(
     data.frame(v = 1:5, w = letters[1:5]),
     data.frame(v = c(1L, 2L, 9L), w = c("a", "x", "c"))
@@ -90,7 +112,7 @@ test_that("parity: keyless comparison with truncation", {
 })
 
 test_that("parity: multiple keys", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(k1 = c(1, 1, 2, 3), k2 = c("a", "b", "a", "z"), v = 1:4)
   b <- data.frame(
     k1 = c(1, 1, 2, 4),
@@ -101,14 +123,14 @@ test_that("parity: multiple keys", {
 })
 
 test_that("parity: unsorted keys are reported in key order", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(id = c(3L, 1L, 2L), v = c(30L, 10L, 20L))
   b <- data.frame(id = c(2L, 3L, 1L), v = c(21L, 31L, 11L))
   expect_parity(a, b, keys = "id")
 })
 
 test_that("parity: factors, NA/NaN handling, and type-mismatched columns", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(
     id = 1:4,
     f = factor(c("u", "v", "u", "w")),
@@ -125,7 +147,7 @@ test_that("parity: factors, NA/NaN handling, and type-mismatched columns", {
 })
 
 test_that("parity: trimChars and roundDigits", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(s = c("x ", " y", "z"), v = c(1.14, 2.26, 3.5))
   b <- data.frame(s = c("x", "y", "z"), v = c(1.11, 2.29, 3.5))
   expect_parity(a, b, trimChars = TRUE, roundDigits = 1)
@@ -133,13 +155,13 @@ test_that("parity: trimChars and roundDigits", {
 })
 
 test_that("parity: identical frames", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(x = 1:3, y = c("a", "b", "c"))
   expect_parity(a, a)
 })
 
 test_that("parity: column name cleaning and case-insensitive matching", {
-  skip_if_not_installed("dataCompareR")
+  skip_unless_oracle()
   a <- data.frame(1:2, 3:4, 5:6)
   names(a) <- c("Val One", "x", "extra")
   b <- data.frame(1:2, 3:4)
