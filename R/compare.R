@@ -252,7 +252,7 @@ compare_diff <- function(
       filter(.data$.join_type == "both" | .data$.join_type == .data$.source)
   }
 
-  diff_data |>
+  out <- diff_data |>
     mutate(.diff_type = "diff") |>
     # add context rows, arrange columns and rows for output
     bind_rows(context_data) |>
@@ -265,6 +265,14 @@ compare_diff <- function(
       all_of(diff_columns)
     ) |>
     arrange(.data$.row)
+
+  new_datadiff_diff(
+    out,
+    tolerance = tolerance,
+    diff_columns = diff_columns,
+    n_differences = as.integer(n_differences),
+    truncated = n_differences > max_differences
+  )
 }
 
 #' Compare groups between two data frames

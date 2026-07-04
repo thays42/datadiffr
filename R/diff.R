@@ -17,6 +17,8 @@ f_ctx <- formattable::formatter(
 #' @return A formattable/kableExtra HTML table object.
 #' @noRd
 show_diff <- function(diffs) {
+  tolerance <- attr(diffs, "tolerance") %||% .Machine$double.eps^0.5
+
   # Identify blocks of rows for formatting the table
   row_groups <- diffs |>
     mutate(
@@ -40,9 +42,13 @@ show_diff <- function(diffs) {
     group_by(.data$.row) |>
     mutate(across(!c(.join_type, .source), function(x) {
       case_when(
-        .data$.source == "x" & !is_equal(x, lead(x)) | .data$.join_type == "x" ~
+        .data$.source == "x" &
+          !is_equal(x, lead(x), tolerance = tolerance) |
+          .data$.join_type == "x" ~
           f_red(x),
-        .data$.source == "y" & !is_equal(x, lag(x)) | .data$.join_type == "y" ~
+        .data$.source == "y" &
+          !is_equal(x, lag(x), tolerance = tolerance) |
+          .data$.join_type == "y" ~
           f_green(x),
         TRUE ~ f_ctx(x)
       )
