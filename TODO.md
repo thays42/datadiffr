@@ -5,8 +5,9 @@ compat, pkgdown, performance, style, code review, competitive positioning).
 
 Status as of 2026-07-04: Phases 0-3 complete. Phase 2 architecture items all
 done (classed diff object + B11 fix, renderer perf, compare_diff decomposition;
-join-padding perf deferred as low value). 547 tests passing; R CMD check clean
-except a local qpdf WARNING (CRAN builders have qpdf).
+join-padding perf deferred as low value). Phase 4 started: README and @examples
+done; CI/pkgdown/URL deferred until the GitHub repo rename lands. 547 tests
+passing; R CMD check clean except a local qpdf WARNING (CRAN builders have qpdf).
 
 ## Blocking decisions
 
@@ -116,11 +117,16 @@ Remaining test gaps (fine to grow organically):
 
 ## Phase 4 — Documentation & site
 
-- [ ] Real README (currently 10 bytes) via `usethis::use_readme_rmd()` — pitch,
-  install, rendered `diffdata()` example with report screenshot, honest
-  comparison table.
-- [ ] `@examples` for all exported functions (currently zero anywhere);
-  `@examplesIf interactive()` for `render_diff()`.
+- [x] Real README (README.Rmd → README.md) — pitch, GitHub install, a live
+  `compare_data()` example, a screenshot of the HTML report
+  (man/figures/README-diff-example.png, generated via headless chromium +
+  `magick -trim`), and an honest comparison table vs
+  waldo/diffdf/arsenal/compareDF/dataCompareR. README.Rmd added to
+  .Rbuildignore.
+- [x] `@examples` for all exported functions — runnable examples on
+  `compare_data()`/`compare_groups()`/`compare_columns()`/`is_equal()`;
+  `@examplesIf interactive()` on `diffdata()`/`render_diff()` (they open an
+  HTML report). rcompare surface already had examples. `checking examples ... OK`.
 - [ ] "Get started" vignette (VignetteBuilder is declared but vignettes/ doesn't
   exist).
 - [ ] `URL:` + `BugReports:` in DESCRIPTION (`usethis::use_github_links()`).
