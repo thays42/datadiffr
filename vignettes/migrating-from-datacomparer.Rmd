@@ -22,10 +22,10 @@ drop-in replacement for the package's entire exported surface —
 code is reused) and verified field-by-field against dataCompareR itself
 in datadiffr's test suite.
 
-In most scripts, migration is one line:
+In most scripts, migration means replacing `library(dataCompareR)`
+with:
 
 ```{r, eval = FALSE}
-# library(dataCompareR)
 library(datadiffr)
 ```
 
