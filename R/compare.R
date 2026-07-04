@@ -167,6 +167,72 @@ compare_join_keyed <- function(x, y, by) {
     select(-all_of(c(".__datadiff_in_x__", ".__datadiff_in_y__")))
 }
 
+# Build a logical matrix of cell-level differences: one column per compared
+# column, TRUE where the `x` and `y` values differ beyond `tolerance`.
+diff_mask <- function(data, compare_cols, tolerance) {
+  mask <- matrix(FALSE, nrow = nrow(data), ncol = length(compare_cols))
+  colnames(mask) <- compare_cols
+  for (column in compare_cols) {
+    mask[, column] <- !is_equal(
+      data[[paste0(column, ".__datadiff_x__")]],
+      data[[paste0(column, ".__datadiff_y__")]],
+      tolerance = tolerance
+    )
+  }
+  mask
+}
+
+# Reduce the cell mask to the differing rows, applying the `max_differences`
+# cap. Rows only in `x` or only in `y` are always differences, even when their
+# compared values are all NA. Returns the row mask (with truncated rows
+# dropped), the indices of every differing row (including truncated ones, so
+# they are never shown as context), the changed columns, the total count, and
+# whether truncation occurred.
+limit_differences <- function(mask, join_type, max_differences) {
+  row_mask <- rowSums(mask) > 0 | join_type != "both"
+  all_diff_rows <- which(row_mask)
+  n_differences <- sum(row_mask)
+  truncated <- n_differences > max_differences
+  if (truncated) {
+    cli::cli_alert_info(
+      "{n_differences} differing row{?s} found. Reporting the first {max_differences} only."
+    )
+    last_diff <- max(head(which(row_mask), max_differences))
+    row_mask[seq_along(row_mask) > last_diff] <- FALSE
+    col_mask <- colSums(mask[seq_len(last_diff), , drop = FALSE]) > 0
+  } else {
+    col_mask <- colSums(mask) > 0
+  }
+  list(
+    row_mask = row_mask,
+    all_diff_rows = all_diff_rows,
+    diff_columns = colnames(mask)[col_mask],
+    n_differences = n_differences,
+    truncated = truncated
+  )
+}
+
+# Logical mask of context rows: the `context_rows` rows before and after each
+# differing row, excluding the differing rows themselves (including those
+# hidden by truncation, so a truncated difference never reappears as context).
+context_indices <- function(row_mask, all_diff_rows, context_rows, n_rows) {
+  context_mask <- rep(FALSE, n_rows)
+  diff_indices <- which(row_mask)
+  n_diffs <- length(diff_indices)
+  ctx_back <- rep(context_rows[1] + 1, times = n_diffs)
+  ctx_fwd <- rep(context_rows[2] + 1, times = n_diffs)
+  context_mask[pmax(
+    sequence(ctx_back, from = diff_indices, by = -1L),
+    1L
+  )] <- TRUE
+  context_mask[pmin(
+    sequence(ctx_fwd, from = diff_indices, by = 1L),
+    n_rows
+  )] <- TRUE
+  context_mask[all_diff_rows] <- FALSE
+  context_mask
+}
+
 compare_diff <- function(
   data,
   context_rows = c(3L, 3L),
@@ -180,52 +246,17 @@ compare_diff <- function(
     str_remove("\\.__datadiff_(x|y)__$") |>
     unique()
 
-  # identify rows with differences
-  mask <- matrix(FALSE, nrow = nrow(data), ncol = length(compare_cols))
-  colnames(mask) <- compare_cols
-  for (column in compare_cols) {
-    mask[, column] <- !is_equal(
-      data[[paste0(column, ".__datadiff_x__")]],
-      data[[paste0(column, ".__datadiff_y__")]],
-      tolerance = tolerance
-    )
-  }
+  mask <- diff_mask(data, compare_cols, tolerance)
+  limited <- limit_differences(mask, data$.join_type, max_differences)
+  row_mask <- limited$row_mask
+  diff_columns <- limited$diff_columns
 
-  # limit to max differences
-  # rows only in x or only in y are always differences, even if their
-  # compared values are all NA
-  row_mask <- rowSums(mask) > 0 | data$.join_type != "both"
-  all_diff_rows <- which(row_mask)
-  n_differences <- sum(row_mask)
-  if (n_differences > max_differences) {
-    cli::cli_alert_info(
-      "{n_differences} differing row{?s} found. Reporting the first {max_differences} only."
-    )
-    last_diff <- max(head(which(row_mask), max_differences))
-    row_mask[seq_along(row_mask) > last_diff] <- FALSE
-    col_mask <- colSums(mask[seq_len(last_diff), , drop = FALSE]) > 0
-  } else {
-    col_mask <- colSums(mask) > 0
-  }
-  diff_columns <- compare_cols[col_mask]
-
-  # identify context rows
-  context_mask <- rep(FALSE, nrow(data))
-  diff_indices <- which(row_mask)
-  n_diffs <- length(diff_indices)
-  ctx_back <- rep(context_rows[1] + 1, times = n_diffs)
-  ctx_fwd <- rep(context_rows[2] + 1, times = n_diffs)
-  context_mask[pmax(
-    sequence(ctx_back, from = diff_indices, by = -1L),
-    1L
-  )] <- TRUE
-  context_mask[pmin(
-    sequence(ctx_fwd, from = diff_indices, by = 1L),
+  context_mask <- context_indices(
+    row_mask,
+    limited$all_diff_rows,
+    context_rows,
     nrow(data)
-  )] <- TRUE
-  # exclude every differing row, including rows hidden by max_differences;
-  # a truncated difference must not reappear disguised as a context row
-  context_mask[all_diff_rows] <- FALSE
+  )
 
   # pull context rows
   # context rows are pulled from the `x` data frame
@@ -270,8 +301,8 @@ compare_diff <- function(
     out,
     tolerance = tolerance,
     diff_columns = diff_columns,
-    n_differences = as.integer(n_differences),
-    truncated = n_differences > max_differences
+    n_differences = as.integer(limited$n_differences),
+    truncated = limited$truncated
   )
 }
 
