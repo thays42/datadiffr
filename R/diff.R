@@ -19,18 +19,13 @@ f_ctx <- formattable::formatter(
 show_diff <- function(diffs) {
   tolerance <- attr(diffs, "tolerance") %||% .Machine$double.eps^0.5
 
-  # Identify blocks of rows for formatting the table
-  row_groups <- diffs |>
-    mutate(
-      .rn = row_number(),
-      .block = cumsum(replace_na(.data$.row > lag(.data$.row) + 1, FALSE))
-    ) |>
-    group_by(.data$.block) |>
-    summarize(
-      start_row = min(.data$.rn),
-      end_row = max(.data$.rn)
-    ) |>
-    ungroup()
+  # Blocks are runs of contiguous rows; a gap in `.row` starts a new block.
+  # Each new block (after the first) gets a top border to separate it visually.
+  # This replaces kableExtra::pack_rows(), which is O(n^2) in the block count.
+  block_separators <- which(c(
+    FALSE,
+    diffs$.row[-1] > diffs$.row[-nrow(diffs)] + 1
+  ))
 
   # Identify row types
   ours <- which(diffs$.source == "x")
@@ -64,24 +59,34 @@ show_diff <- function(diffs) {
       fixed_thead = TRUE,
       html_font = "monospace"
     ) |>
-    kableExtra::column_spec(
-      seq_along(diffs),
-      border_left = "1px solid #eeeeee",
-      border_right = "1px solid #eeeeee"
-    ) |>
     kableExtra::row_spec(ours, background = "#e6a8a8") |>
     kableExtra::row_spec(theirs, background = "#a7d1a9") |>
     kableExtra::row_spec(context, color = "#959595")
 
-  for (i in seq_len(nrow(row_groups))) {
-    tbl <- kableExtra::pack_rows(
+  if (length(block_separators) > 0) {
+    tbl <- kableExtra::row_spec(
       tbl,
-      start_row = row_groups$start_row[i],
-      end_row = row_groups$end_row[i]
+      block_separators,
+      extra_css = "border-top: 2px solid #cccccc;"
     )
   }
 
-  tbl
+  add_column_borders(tbl)
+}
+
+# Column separators via a scoped stylesheet rule instead of per-cell
+# kableExtra::column_spec(), which rewrites every <td> and is O(rows * cols).
+# The lightable table is a self-contained HTML string (no html dependency),
+# so prepending a <style> and restoring the kable attributes is safe.
+add_column_borders <- function(tbl) {
+  style <- paste0(
+    "<style>.lightable-paper td, .lightable-paper th ",
+    "{ border-left: 1px solid #eeeeee; border-right: 1px solid #eeeeee; }",
+    "</style>\n"
+  )
+  out <- paste0(style, as.character(tbl))
+  attributes(out) <- attributes(tbl)
+  out
 }
 
 #' Render a diff in a flexdashboard
