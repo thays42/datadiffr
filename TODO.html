@@ -40,7 +40,7 @@
 <div id="pre-cran-roadmap" class="section level1">
 
 <p>From the 2026-07-03 project roundup (seven parallel assessments: validation, dataCompareR compat, pkgdown, performance, style, code review, competitive positioning).</p>
-<p>Status as of 2026-07-04: Phases 0-4 complete (Phase 4 only leaves the optional test-hygiene split). GitHub repo renamed to thays42/datadiffr; README, @examples, “Get started” vignette, CI + pkgdown workflows, and URL/BugReports all shipped. Repo-side step still pending: enable GitHub Pages so pkgdown can publish. Next is Phase 5 (CRAN submission). 547 tests passing; R CMD check clean except a local qpdf WARNING (CRAN builders have qpdf).</p>
+<p>Status as of 2026-07-04: Phases 0-4 complete. Phase 5 nearly done — version 0.1.0, NEWS.md, cran-comments.md all written; <code>R CMD check --as-cran</code> clean (0/0/0); CI green on all 5 platforms; pkgdown site live at <a href="https://thays42.github.io/datadiffr/" class="uri">https://thays42.github.io/datadiffr/</a>. Remaining before submission: win-builder + rhub, then submit. 547 tests passing locally.</p>
 <div class="section level2">
 <h2 id="blocking-decisions">Blocking decisions<a class="anchor" aria-label="anchor" href="#blocking-decisions"></a></h2>
 <ul class="task-list"><li><label><input type="checkbox" checked><strong>Rename the package</strong> — renamed to <strong>datadiffr</strong> (chosen 2026-07-03; <code>datadiff</code> was taken on CRAN 2026-06-18 by an unrelated ThinkR package). Package-internal rename done. Still user-side: rename the GitHub repo (<code>gh repo rename datadiffr</code>) and optionally the local directory, then update DESCRIPTION URL/BugReports to the new slug.</label></li>
@@ -97,8 +97,10 @@
 <ul class="task-list"><li><label><input type="checkbox" checked>Execute the package rename (repo rename still user-side; pkgdown URL follows Phase 4).</label></li>
 <li><label><input type="checkbox" checked>DESCRIPTION positioning statement naming alternatives, Title-Case title, URL/BugReports.</label></li>
 <li><label><input type="checkbox" checked>NEWS.md written (initial-release feature summary) and version bumped 0.0.0.9000 → 0.1.0. Plain <code>R CMD check</code> still clean (0 errors / 0 notes / qpdf WARNING only).</label></li>
-<li><label><input type="checkbox"><code>R CMD check --as-cran</code> clean — expect a “New submission” NOTE and possibly URL/spell-check NOTEs to triage. Needs qpdf installed locally to clear the size-reduction WARNING.</label></li>
-<li><label><input type="checkbox">cran-comments.md (document the qpdf note + any –as-cran NOTEs).</label></li>
+<li><label><input type="checkbox" checked><code>R CMD check --as-cran</code> clean locally — 0 errors / 0 warnings / 0 notes (qpdf installed). The “New submission” NOTE only appears on CRAN’s incoming-feasibility step (needs network), and the archived-dataCompareR Suggests NOTE is documented in cran-comments.</label></li>
+<li><label><input type="checkbox" checked>Spell check set up (inst/WORDLIST, tests/spelling.R, Language: en-US); <code>spell_check_package()</code> clean; British spellings switched to American.</label></li>
+<li><label><input type="checkbox" checked>cran-comments.md — documents “New submission” + archived-dataCompareR Suggests (conditional oracle via skip_if_not_installed).</label></li>
+<li><label><input type="checkbox" checked>CI is green: R-CMD-check passes on all 5 platforms (ubuntu devel/release/oldrel-1, macOS, Windows); pkgdown builds and the site is live at <a href="https://thays42.github.io/datadiffr/" class="uri">https://thays42.github.io/datadiffr/</a>. dataCompareR (archived) installed in CI from the CRAN archive; parity tests skip when it can’t run against modern dplyr (skip_unless_oracle helper). Note: the legacy “pages build and deployment” occasionally transient-fails (“try again later”) since Pages uses the branch source — it self-heals on retrigger; switching Pages to the “GitHub Actions” source would remove it (optional).</label></li>
 <li><label><input type="checkbox">win-builder (devel + release) and rhub checks.</label></li>
 <li><label><input type="checkbox">Submit to CRAN (<code><a href="https://devtools.r-lib.org/reference/submit_cran.html" class="external-link">devtools::submit_cran()</a></code> or the web form).</label></li>
 </ul></div>
