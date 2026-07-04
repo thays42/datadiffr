@@ -14,7 +14,7 @@ MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/
 
 datadiffr compares two data frames and shows you the differences the way
 a code review shows you a diff: **cell by cell, with context, as a
-styled HTML report**. Changed rows are lined up old-above-new, coloured
+styled HTML report**. Changed rows are lined up old-above-new, colored
 red and green, with a few unchanged rows around each change for context.
 
 It fills the report-oriented lane for data comparison. `waldo` and
@@ -78,7 +78,7 @@ the RStudio viewer or your browser (or writes it to a file with
 diffdata(before, after)
 ```
 
-<img src="man/figures/README-diff-example.png" width="420" alt="An HTML diff report: changed rows shown old-above-new in red and green, with grey context rows around each change." />
+<img src="man/figures/README-diff-example.png" width="420" alt="An HTML diff report: changed rows shown old-above-new in red and green, with gray context rows around each change." />
 
 ## How it compares
 

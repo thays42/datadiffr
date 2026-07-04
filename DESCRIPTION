@@ -32,7 +32,8 @@ Suggests:
     dataCompareR,
     compareDF,
     diffdf,
-    waldo
+    waldo,
+    spelling
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports:
@@ -49,3 +50,4 @@ Imports:
     tidyr,
     cli,
     rmarkdown
+Language: en-US

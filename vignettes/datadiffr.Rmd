@@ -135,8 +135,8 @@ Here `value` changed type (integer to double) and `note` exists only in `x`.
 ## Rendering an HTML report
 
 `diffdata()` runs the comparison and opens the result as a styled, self-contained
-HTML report — changed rows coloured red (before) and green (after), with context
-rows greyed out. In an interactive session it opens in the RStudio viewer or your
+HTML report — changed rows colored red (before) and green (after), with context
+rows grayed out. In an interactive session it opens in the RStudio viewer or your
 browser:
 
 ```{r eval = FALSE}
