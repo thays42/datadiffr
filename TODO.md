@@ -3,11 +3,12 @@
 From the 2026-07-03 project roundup (seven parallel assessments: validation, dataCompareR
 compat, pkgdown, performance, style, code review, competitive positioning).
 
-Status as of 2026-07-04: Phases 0-3 complete. Phase 2 architecture items all
-done (classed diff object + B11 fix, renderer perf, compare_diff decomposition;
-join-padding perf deferred as low value). Phase 4 started: README and @examples
-done; CI/pkgdown/URL deferred until the GitHub repo rename lands. 547 tests
-passing; R CMD check clean except a local qpdf WARNING (CRAN builders have qpdf).
+Status as of 2026-07-04: Phases 0-4 complete (Phase 4 only leaves the optional
+test-hygiene split). GitHub repo renamed to thays42/datadiffr; README,
+@examples, "Get started" vignette, CI + pkgdown workflows, and URL/BugReports
+all shipped. Repo-side step still pending: enable GitHub Pages so pkgdown can
+publish. Next is Phase 5 (CRAN submission). 547 tests passing; R CMD check clean
+except a local qpdf WARNING (CRAN builders have qpdf).
 
 ## Blocking decisions
 
@@ -127,17 +128,26 @@ Remaining test gaps (fine to grow organically):
   `compare_data()`/`compare_groups()`/`compare_columns()`/`is_equal()`;
   `@examplesIf interactive()` on `diffdata()`/`render_diff()` (they open an
   HTML report). rcompare surface already had examples. `checking examples ... OK`.
-- [ ] "Get started" vignette (VignetteBuilder is declared but vignettes/ doesn't
-  exist).
-- [ ] `URL:` + `BugReports:` in DESCRIPTION (`usethis::use_github_links()`).
-- [ ] CI: `usethis::use_github_action("check-standard")` (currently zero CI),
-  optionally test-coverage.
-- [ ] `usethis::use_pkgdown_github_pages()`; curate reference index (High-level
-  API / Comparison / Utilities); remove stale empty `docs/`.
+- [x] "Get started" vignette — `vignettes/datadiffr.Rmd` (pkgdown surfaces the
+  package-named vignette as the "Get started" link): core workflow, context
+  rows, key matching, tolerance, column comparison, HTML report. All chunks
+  verified against real output.
+- [x] `URL:` + `BugReports:` in DESCRIPTION — repo renamed to
+  `thays42/datadiffr`; DESCRIPTION URL/BugReports and the README install line
+  point at the new slug, plus the pkgdown site URL.
+- [x] CI: added `.github/workflows/R-CMD-check.yaml` (check-standard matrix)
+  and an R-CMD-check badge. Test-coverage workflow skipped for now (needs a
+  Codecov token).
+- [x] pkgdown: `_pkgdown.yml` with a curated reference index (High-level API /
+  Comparison / Rendering / dataCompareR compatibility); `check_pkgdown()`
+  reports no problems. Added `.github/workflows/pkgdown.yaml` deploy workflow.
+  Removed the stale empty `docs/`. **Repo-side step still needed:** enable
+  GitHub Pages (gh-pages branch) so the pkgdown workflow can publish.
 - [x] Style pass: cli_abort in render_diff, @noRd internals, stale
   globalVariables, markdown Rd bullets, test naming. (lint + air format clean.)
 - [ ] Split remaining test hygiene: diffdata validation mega-test was split;
-  consider `skip_if_not_installed` patterns as Suggests usage grows.
+  consider `skip_if_not_installed` patterns as Suggests usage grows. (Optional,
+  non-blocking.)
 
 ## Phase 5 — CRAN submission
 
