@@ -155,8 +155,15 @@ Remaining test gaps (fine to grow organically):
   follows Phase 4).
 - [x] DESCRIPTION positioning statement naming alternatives, Title-Case
   title, URL/BugReports.
-- [ ] NEWS.md, version bump, `R CMD check --as-cran` clean, win-builder/rhub,
-  submit.
+- [x] NEWS.md written (initial-release feature summary) and version bumped
+  0.0.0.9000 → 0.1.0. Plain `R CMD check` still clean (0 errors / 0 notes /
+  qpdf WARNING only).
+- [ ] `R CMD check --as-cran` clean — expect a "New submission" NOTE and
+  possibly URL/spell-check NOTEs to triage. Needs qpdf installed locally to
+  clear the size-reduction WARNING.
+- [ ] cran-comments.md (document the qpdf note + any --as-cran NOTEs).
+- [ ] win-builder (devel + release) and rhub checks.
+- [ ] Submit to CRAN (`devtools::submit_cran()` or the web form).
 
 ## Positioning (settled by research, for reference)
 
