@@ -60,7 +60,7 @@ summary(cmp)
 #> Data Comparison
 #> ===============
 #> 
-#> Date comparison run: 2026-07-04 20:11:56  
+#> Date comparison run: 2026-07-04 20:28:23  
 #> Comparison run on R version 4.6.1 (2026-06-24)  
 #> With datadiffr version 0.1.0  
 #> 
