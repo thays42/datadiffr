@@ -3,8 +3,10 @@
 From the 2026-07-03 project roundup (seven parallel assessments: validation, dataCompareR
 compat, pkgdown, performance, style, code review, competitive positioning).
 
-Status as of 2026-07-03: Phases 0-1 complete; Phase 2 mostly complete.
-R CMD check: 0 errors, 0 warnings, 0 notes. 177 tests passing.
+Status as of 2026-07-04: Phases 0-3 complete. Phase 2 architecture items all
+done (classed diff object + B11 fix, renderer perf, compare_diff decomposition;
+join-padding perf deferred as low value). 547 tests passing; R CMD check clean
+except a local qpdf WARNING (CRAN builders have qpdf).
 
 ## Blocking decisions
 
@@ -51,7 +53,8 @@ All reproduced bugs fixed test-first (see git log for details):
   robust anyway during the rowSums refactor.
 
 Remaining test gaps (fine to grow organically):
-- [ ] `show_diff()` output has no direct assertions (only exercised via diffdata).
+- [x] `show_diff()` now has direct output assertions (test-show-diff.R: block
+  separators, cell colouring, column borders; test-diff-class.R: B11 tolerance).
 
 ## Phase 2 — Architecture
 
@@ -67,18 +70,26 @@ Remaining test gaps (fine to grow organically):
 - [x] Perf: `apply()` → `rowSums()`/`colSums()` in the mask reductions.
 - [x] Dropped glue, fs, and lubridate dependencies; added checkmate, rlang,
   tidyselect (all previously transitive).
-- [ ] **Classed diff object** (`datadiff_diff` subclass of tbl_df) carrying
-  tolerance, truncation state, and diff columns as attributes, with print()
-  and summary() methods. Fixes B11 (renderer re-derives the mask with the
-  DEFAULT tolerance instead of the user's — still open) and gives headless
-  users console output. Design this together with the rCompare compat object.
-- [ ] Renderer perf/redesign: kableExtra per-row DOM surgery is O(n^1.5-2)
-  (53s at ~1.5k diff rows). Rebuild table HTML via vectorized string
-  construction, or cap + warn. Only bites users who raise max_differences.
-- [ ] Decompose `compare_diff()` (~90 lines, five jobs) into diff_mask()/
-  limit_differences()/context_indices() helpers when touching it next.
-- [ ] Optional perf: replace the positional hash join with frame padding
-  (measured 55x on the join step; whole compare path already ~1s at 500k rows).
+- [x] **Classed diff object** (`datadiff_diff` subclass of tbl_df) carrying
+  `tolerance`, `n_differences`, `truncated`, and `diff_columns` as attributes,
+  with `print()` and `summary()` methods (R/diff-class.R). `compare_data()`
+  returns it; headless users get console output. **Fixes B11**: `show_diff()`
+  now reads the tolerance from the object instead of re-deriving the cell mask
+  with the default tolerance.
+- [x] Renderer perf: removed the two O(n^2) kableExtra offenders —
+  `pack_rows()` (one call per block, replaced by a single `row_spec()` border
+  rule between blocks) and `column_spec()` (per-`<td>` rewrite, replaced by a
+  scoped `<style>` rule on the self-contained lightable table). ~1.5k diff rows
+  dropped from ~53s to ~7s. Remaining cost is the `row_spec()` background
+  calls (still O(n^2), smaller constant); a full vectorized HTML rebuild would
+  go further but is deferred — it changes the whole visual path and wants
+  interactive visual verification. Only bites users who raise max_differences.
+- [x] Decomposed `compare_diff()` into `diff_mask()` / `limit_differences()` /
+  `context_indices()` helpers (R/compare.R). Pure refactor; behavior unchanged.
+- [ ] Optional perf (deferred, low value): replace the positional hash join
+  with frame padding (measured 55x on the join step alone, but the whole
+  compare path is already ~1s at 500k rows, so the join is not the bottleneck;
+  the renderer was). Not worth the rewrite risk for no user-visible gain.
 
 ## Phase 3 — dataCompareR compatibility — DONE
 
