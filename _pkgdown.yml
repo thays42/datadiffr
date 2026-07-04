@@ -1,0 +1,31 @@
+url: https://thays42.github.io/datadiffr/
+
+template:
+  bootstrap: 5
+
+reference:
+- title: High-level API
+  desc: Compare two data frames and render the result in one call.
+  contents:
+  - diffdata
+- title: Comparison
+  desc: Build and inspect diffs directly.
+  contents:
+  - compare_data
+  - compare_columns
+  - compare_groups
+  - is_equal
+- title: Rendering
+  desc: Turn a diff into an HTML report.
+  contents:
+  - render_diff
+- title: dataCompareR compatibility
+  desc: >
+    Clean-room drop-in replacements for the archived dataCompareR package,
+    returning objects with the same shape.
+  contents:
+  - rCompare
+  - generateMismatchData
+  - saveReport
+  - print.datadiff_compare
+  - summary.datadiff_compare

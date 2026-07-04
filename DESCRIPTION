@@ -13,8 +13,9 @@ Description: Compare two data frames and visualize the differences as a
     'diffdf', which target console and text output, and provides an
     actively maintained alternative to 'compareDF' and the archived
     'dataCompareR' for report-oriented data comparison workflows.
-URL: https://github.com/thays42/datadiff
-BugReports: https://github.com/thays42/datadiff/issues
+URL: https://github.com/thays42/datadiffr,
+    https://thays42.github.io/datadiffr/
+BugReports: https://github.com/thays42/datadiffr/issues
 License: MIT + file LICENSE
 Depends: R (>= 4.1)
 Encoding: UTF-8

@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/thays42/datadiffr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/thays42/datadiffr/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License:
@@ -28,7 +29,7 @@ Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
-pak::pak("thays42/datadiff")
+pak::pak("thays42/datadiffr")
 ```
 
 ## Quick start
