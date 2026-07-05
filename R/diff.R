@@ -94,8 +94,9 @@ add_column_borders <- function(tbl) {
 #' Opens the diff as an HTML report in the RStudio viewer (if available) or
 #' browser. Optionally saves to a file.
 #'
-#' @param diff Data frame as returned by [compare_data()], containing `.row`,
-#'   `.join_type`, `.diff_type`, `.source`, and data columns.
+#' @param diff A `datadiff_result` (from [compare_data()]), a `datadiff_compare`
+#'   (from [rCompare()]), or a bare diff data frame containing `.row`,
+#'   `.join_type`, `.diff_type`, and `.source` columns.
 #' @param output_file Optional file path to save the HTML report. If provided,
 #'   the report is saved to this location instead of (or in addition to) opening
 #'   in the viewer.

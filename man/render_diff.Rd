@@ -16,8 +16,9 @@ render_diff(diff, output_file = NULL)
 \method{render_diff}{default}(diff, output_file = NULL)
 }
 \arguments{
-\item{diff}{Data frame as returned by \code{\link[=compare_data]{compare_data()}}, containing \code{.row},
-\code{.join_type}, \code{.diff_type}, \code{.source}, and data columns.}
+\item{diff}{A \code{datadiff_result} (from \code{\link[=compare_data]{compare_data()}}), a \code{datadiff_compare}
+(from \code{\link[=rCompare]{rCompare()}}), or a bare diff data frame containing \code{.row},
+\code{.join_type}, \code{.diff_type}, and \code{.source} columns.}
 
 \item{output_file}{Optional file path to save the HTML report. If provided,
 the report is saved to this location instead of (or in addition to) opening

@@ -140,6 +140,13 @@ test_that("summary.datadiff_result dispatches on kind", {
   expect_s3_class(s, "summary.datadiff_result")
   expect_equal(s$kind, "schema")
   expect_message(print(s), "[Cc]olumns differ")
+
+  x <- tibble::tibble(id = 1:2, v = c(1, 2))
+  y <- tibble::tibble(id = 1:2, v = c(1, 9))
+  value_res <- compare_data(x, y, context_rows = c(0L, 0L))
+  sv <- summary(value_res)
+  expect_s3_class(sv, "summary.datadiff_result")
+  expect_equal(sv$kind, "value")
 })
 
 test_that("render_diff.datadiff_result handles non-value kinds on the console", {
@@ -153,4 +160,17 @@ test_that("render_diff.datadiff_result handles non-value kinds on the console", 
   )
   expect_message(render_diff(schema_res), "[Cc]olumns differ")
   expect_null(suppressMessages(render_diff(schema_res)))
+})
+
+test_that("render_diff.datadiff_result delegates the value kind to the row renderer", {
+  x <- tibble::tibble(id = 1:2, v = c(1, 2))
+  y <- tibble::tibble(id = 1:2, v = c(1, 9))
+  value_res <- compare_data(x, y, context_rows = c(0L, 0L))
+  expect_error(
+    render_diff(
+      value_res,
+      output_file = file.path(tempdir(), "no_such_dir", "out.html")
+    ),
+    "does not exist"
+  )
 })

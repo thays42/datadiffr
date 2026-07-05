@@ -63,7 +63,7 @@ test_that("diffdata returns a schema-kind result invisibly when columns differ",
   df3 <- tibble(a = 1:5, c = letters[1:5])
 
   expect_message(res <- diffdata(df1, df3), "[Cc]olumns differ")
-  expect_invisible(diffdata(df1, df3) |> invisible())
+  expect_invisible(suppressMessages(diffdata(df1, df3)))
   res <- suppressMessages(diffdata(df1, df3))
   expect_s3_class(res, "datadiff_result")
   expect_equal(res$kind, "schema")
