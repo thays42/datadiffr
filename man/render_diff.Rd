@@ -3,12 +3,15 @@
 \name{render_diff}
 \alias{render_diff}
 \alias{render_diff.datadiff_compare}
+\alias{render_diff.datadiff_result}
 \alias{render_diff.default}
 \title{Render a diff in a flexdashboard}
 \usage{
 render_diff(diff, output_file = NULL)
 
 \method{render_diff}{datadiff_compare}(diff, output_file = NULL)
+
+\method{render_diff}{datadiff_result}(diff, output_file = NULL)
 
 \method{render_diff}{default}(diff, output_file = NULL)
 }

@@ -136,3 +136,16 @@ test_that("summary.datadiff_result dispatches on kind", {
   expect_equal(s$kind, "schema")
   expect_message(print(s), "[Cc]olumns differ")
 })
+
+test_that("render_diff.datadiff_result handles non-value kinds on the console", {
+  identical_res <- new_datadiff_result(kind = "identical")
+  expect_message(render_diff(identical_res), "[Nn]o differences")
+  expect_null(suppressMessages(render_diff(identical_res)))
+
+  schema_res <- new_datadiff_result(
+    kind = "schema",
+    columns = tibble::tibble(.diff = "in x only", column = "z")
+  )
+  expect_message(render_diff(schema_res), "[Cc]olumns differ")
+  expect_null(suppressMessages(render_diff(schema_res)))
+})

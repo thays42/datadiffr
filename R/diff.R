@@ -127,6 +127,24 @@ render_diff.datadiff_compare <- function(diff, output_file = NULL) {
 
 #' @rdname render_diff
 #' @export
+render_diff.datadiff_result <- function(diff, output_file = NULL) {
+  switch(
+    diff$kind,
+    identical = {
+      cli::cli_alert_success("No differences found.")
+      invisible(NULL)
+    },
+    schema = {
+      cli::cli_alert_info("Columns differ; showing schema differences.")
+      print(diff$columns)
+      invisible(NULL)
+    },
+    value = render_diff(diff$rows, output_file = output_file)
+  )
+}
+
+#' @rdname render_diff
+#' @export
 render_diff.default <- function(diff, output_file = NULL) {
   checkmate::assert_data_frame(diff)
   checkmate::assert_names(
