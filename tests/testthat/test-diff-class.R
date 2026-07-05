@@ -95,3 +95,16 @@ test_that("show_diff honors the diff object's tolerance (B11)", {
   expect_equal(red, 1L)
   expect_equal(green, 1L)
 })
+
+test_that("new_datadiff_result builds a classed record", {
+  res <- new_datadiff_result(
+    kind = "schema",
+    columns = tibble::tibble(.diff = "in x only", column = "z"),
+    tolerance = 1e-8
+  )
+  expect_s3_class(res, "datadiff_result")
+  expect_equal(res$kind, "schema")
+  expect_equal(nrow(res$columns), 1)
+  expect_null(res$rows)
+  expect_equal(res$tolerance, 1e-8)
+})
