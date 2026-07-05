@@ -58,11 +58,12 @@ diffdata(
 
 ## Value
 
-If `x` and `y` have column differences (different names or types),
-returns a visible data frame describing those differences (from
-[`compare_columns()`](https://thays42.github.io/datadiffr/reference/compare_columns.md)).
-Otherwise, invisibly returns the diff data frame (from
+Invisibly, a `datadiff_result` object (see
 [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)).
+Called for its side effect: when columns match and values differ it
+renders an HTML report; when columns differ it prints the schema
+differences to the console; when the frames are identical it reports no
+differences.
 
 ## Examples
 

@@ -71,7 +71,7 @@
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p><code><a href="reference/compare_data.html">compare_data()</a></code> returns the differences as a tidy data frame, with context rows around each change. Rows are matched by position by default, or by key columns with <code>by =</code>.</p>
+<p><code><a href="reference/compare_data.html">compare_data()</a></code> returns a <code>datadiff_result</code>; for a value diff its <code>$rows</code> holds the differences as a tidy data frame, with context rows around each change. Rows are matched by position by default, or by key columns with <code>by =</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thays42/datadiffr" class="external-link">datadiffr</a></span><span class="op">)</span></span>
 <span></span>
@@ -170,7 +170,7 @@
 </tr>
 </tbody>
 </table>
-<p>datadiffr is the maintained option built around a report-quality HTML diff with configurable context rows. It refuses to diff frames whose columns differ in name or type, reporting the column differences instead (see <code><a href="reference/compare_columns.html">compare_columns()</a></code>).</p>
+<p>datadiffr is the maintained option built around a report-quality HTML diff with configurable context rows. When the two frames have columns that differ in name or type, it reports those column differences instead of diffing values (a <code>"schema"</code> result; see <code><a href="reference/compare_columns.html">compare_columns()</a></code>).</p>
 </div>
 <div class="section level2">
 <h2 id="migrating-from-datacomparer">Migrating from dataCompareR<a class="anchor" aria-label="anchor" href="#migrating-from-datacomparer"></a>

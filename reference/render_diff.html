@@ -52,6 +52,9 @@ browser. Optionally saves to a file.</p>
 <span><span class="co"># S3 method for class 'datadiff_compare'</span></span>
 <span><span class="fu">render_diff</span><span class="op">(</span><span class="va">diff</span>, output_file <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'datadiff_result'</span></span>
+<span><span class="fu">render_diff</span><span class="op">(</span><span class="va">diff</span>, output_file <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Default S3 method</span></span>
 <span><span class="fu">render_diff</span><span class="op">(</span><span class="va">diff</span>, output_file <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -61,8 +64,9 @@ browser. Optionally saves to a file.</p>
 
 
 <dl><dt id="arg-diff">diff<a class="anchor" aria-label="anchor" href="#arg-diff"></a></dt>
-<dd><p>Data frame as returned by <code><a href="compare_data.html">compare_data()</a></code>, containing <code>.row</code>,
-<code>.join_type</code>, <code>.diff_type</code>, <code>.source</code>, and data columns.</p></dd>
+<dd><p>A <code>datadiff_result</code> (from <code><a href="compare_data.html">compare_data()</a></code>), a <code>datadiff_compare</code>
+(from <code><a href="rCompare.html">rCompare()</a></code>), or a bare diff data frame containing <code>.row</code>,
+<code>.join_type</code>, <code>.diff_type</code>, and <code>.source</code> columns.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>

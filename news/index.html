@@ -44,6 +44,8 @@
 <div class="section level3">
 <h3 id="comparison-0-1-0">Comparison<a class="anchor" aria-label="anchor" href="#comparison-0-1-0"></a></h3>
 <ul><li>
+<code><a href="../reference/compare_data.html">compare_data()</a></code> now returns a consolidated <code>datadiff_result</code> object with a <code>kind</code> of <code>"identical"</code>, <code>"schema"</code>, or <code>"value"</code>, instead of a bare diff tibble. Differing columns are reported as a <code>"schema"</code> result rather than an error, and <code><a href="../reference/diffdata.html">diffdata()</a></code> always returns this object invisibly (<a href="https://github.com/thays42/datadiffr/issues/12" class="external-link">#12</a>).</li>
+<li>
 <code><a href="../reference/compare_data.html">compare_data()</a></code> compares two data frames and returns the differences as a tidy data frame, matching rows by position or by key columns (<code>by =</code>), with configurable context rows around each change.</li>
 <li>
 <code><a href="../reference/diffdata.html">diffdata()</a></code> runs the comparison and renders it as an HTML report in the RStudio viewer, browser, or a file.</li>

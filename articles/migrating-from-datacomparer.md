@@ -60,7 +60,7 @@ summary(cmp)
 #> Data Comparison
 #> ===============
 #> 
-#> Date comparison run: 2026-07-04 20:41:49  
+#> Date comparison run: 2026-07-05 20:37:10  
 #> Comparison run on R version 4.6.1 (2026-06-24)  
 #> With datadiffr version 0.1.0  
 #> 
@@ -261,7 +261,8 @@ diffdata(
 compares, then opens the HTML diff report with added rows in green,
 removed rows in red, and unchanged context rows for orientation.
 [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
-returns the underlying diff as a data frame for programmatic use.
+returns the underlying diff as a `datadiff_result` (with the diff rows
+in `$rows`) for programmatic use.
 
 ## Troubleshooting
 

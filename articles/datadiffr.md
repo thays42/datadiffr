@@ -15,7 +15,10 @@ small numeric differences, and rendering an HTML report.
 
 Start with two versions of the same small table.
 [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
-returns the differences as a tidy data frame.
+returns a `datadiff_result` — an object describing what it found. It
+prints a one-line summary above a table of the differences, which is
+handy when you are working in a plain console rather than the HTML
+report.
 
 ``` r
 
@@ -47,7 +50,21 @@ compare_data(before, after)
 #> 8     6 both       diff       y           6 Finn     72
 ```
 
-The result carries a few bookkeeping columns alongside your data:
+The object’s `$kind` field names what kind of difference was found:
+
+``` r
+
+diff <- compare_data(before, after)
+diff$kind
+#> [1] "value"
+```
+
+`"value"` means the two frames share the same columns but some values
+differ. (The other kinds are `"identical"`, when the frames match, and
+`"schema"`, when the columns themselves differ — see [When the columns
+themselves differ](#when-the-columns-themselves-differ) below.) For a
+value diff, the differing rows are in `$rows`, a tidy data frame
+carrying a few bookkeeping columns alongside your data:
 
 - `.row` — the row number the difference came from.
 - `.join_type` — whether the row is in `"x"`, `"y"`, or `"both"`.
@@ -56,10 +73,7 @@ The result carries a few bookkeeping columns alongside your data:
   (after) version; `NA` for context rows.
 
 Each changed row appears twice — the before value above the after value
-— so you can read the change top to bottom, like a unified diff. The
-object prints a one-line summary above the table (here, two changed
-rows), which is handy when you are working in a plain console rather
-than the HTML report.
+— so you can read the change top to bottom, like a unified diff.
 
 ## Controlling context
 
@@ -185,17 +199,29 @@ and it applies on the natural scale for dates (days) and datetimes
 ## When the columns themselves differ
 
 datadiffr compares values, so it expects the two frames to share the
-same columns with compatible types. If they don’t, it reports the
-*column* differences instead of trying to diff the values. You can
-inspect those directly with
-[`compare_columns()`](https://thays42.github.io/datadiffr/reference/compare_columns.md).
+same columns with compatible types. If they don’t,
+[`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
+doesn’t error — it returns a `"schema"` result reporting the *column*
+differences instead of diffing the values.
 
 ``` r
 
 x <- data.frame(id = 1:3, value = 1:3, note = c("a", "b", "c"))
 y <- data.frame(id = 1:3, value = c(1.5, 2.5, 3.5))
 
-compare_columns(x, y)
+schema_diff <- compare_data(x, y)
+schema_diff$kind
+#> [1] "schema"
+```
+
+For a schema result the column differences are in `$columns` — the same
+table
+[`compare_columns()`](https://thays42.github.io/datadiffr/reference/compare_columns.md)
+returns directly:
+
+``` r
+
+schema_diff$columns
 #> # A tibble: 2 × 4
 #>   .diff         column x_type    y_type 
 #>   <chr>         <chr>  <chr>     <chr>  
@@ -204,7 +230,9 @@ compare_columns(x, y)
 ```
 
 Here `value` changed type (integer to double) and `note` exists only in
-`x`.
+`x`. Because the kind is always one of `"value"`, `"identical"`, or
+`"schema"`, calling code can branch on `$kind` and read `$rows` or
+`$columns` accordingly.
 
 ## Rendering an HTML report
 

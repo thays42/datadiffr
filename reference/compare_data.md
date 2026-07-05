@@ -51,27 +51,21 @@ compare_data(
 
 ## Value
 
-A data frame containing differences between `x` and `y` with the
-following columns:
-
-- `.row` - The row number from the original data frames
-
-- `.join_type` - Whether the row is in `"x"`, `"y"`, or `"both"`
-
-- `.diff_type` - Whether the row is a `"diff"` or `"context"` row
-
-- `.source` - For diff rows, whether this is the `"x"` or `"y"` version;
-  `NA` for context rows
-
-Plus the original data columns (context columns and columns with
-differences).
+A `datadiff_result` object. `$kind` is `"identical"`, `"schema"`, or
+`"value"`. For `"schema"` (the frames have different column names or
+types) `$columns` holds a
+[`compare_columns()`](https://thays42.github.io/datadiffr/reference/compare_columns.md)
+tibble and `$rows` is `NULL`. For `"value"`/`"identical"` `$rows` holds
+a `datadiff_diff` of the differences (empty when identical) and
+`$columns` is `NULL`.
 
 ## Details
 
 Rows are matched by position (row number), or by key columns when `by`
 is given. `x` and `y` must share at least one column, and shared columns
-must have compatible types; otherwise an error is thrown. Rows present
-in only one data frame are always reported as differences.
+must have compatible types; otherwise a `"schema"` result is returned
+instead of a row-level comparison. Rows present in only one data frame
+are always reported as differences.
 
 ## Examples
 
@@ -111,10 +105,5 @@ compare_data(x, y, by = "id")
 
 # A numeric tolerance treats near-equal values as equal
 compare_data(x, y, tolerance = 10)
-#> datadiff: 0 changed, 0 added, 0 removed rows across 0 columns
-#> Tolerance: 10
-#> 
-#> # A tibble: 0 × 6
-#> # ℹ 6 variables: .row <int>, .join_type <chr>, .diff_type <chr>, .source <chr>,
-#> #   id <int>, score <dbl>
+#> ✔ No differences found.
 ```

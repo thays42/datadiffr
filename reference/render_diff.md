@@ -11,6 +11,9 @@ render_diff(diff, output_file = NULL)
 # S3 method for class 'datadiff_compare'
 render_diff(diff, output_file = NULL)
 
+# S3 method for class 'datadiff_result'
+render_diff(diff, output_file = NULL)
+
 # Default S3 method
 render_diff(diff, output_file = NULL)
 ```
@@ -19,10 +22,12 @@ render_diff(diff, output_file = NULL)
 
 - diff:
 
-  Data frame as returned by
-  [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md),
-  containing `.row`, `.join_type`, `.diff_type`, `.source`, and data
-  columns.
+  A `datadiff_result` (from
+  [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)),
+  a `datadiff_compare` (from
+  [`rCompare()`](https://thays42.github.io/datadiffr/reference/rCompare.md)),
+  or a bare diff data frame containing `.row`, `.join_type`,
+  `.diff_type`, and `.source` columns.
 
 - output_file:
 

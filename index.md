@@ -24,9 +24,9 @@ pak::pak("thays42/datadiffr")
 ## Quick start
 
 [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
-returns the differences as a tidy data frame, with context rows around
-each change. Rows are matched by position by default, or by key columns
-with `by =`.
+returns a `datadiff_result`; for a value diff its `$rows` holds the
+differences as a tidy data frame, with context rows around each change.
+Rows are matched by position by default, or by key columns with `by =`.
 
 ``` r
 
@@ -86,9 +86,9 @@ change.](reference/figures/README-diff-example.png)
 | dataCompareR | Text / HTML report | Key or position | — | Archived (CRAN 2026-02) |
 
 datadiffr is the maintained option built around a report-quality HTML
-diff with configurable context rows. It refuses to diff frames whose
-columns differ in name or type, reporting the column differences instead
-(see
+diff with configurable context rows. When the two frames have columns
+that differ in name or type, it reports those column differences instead
+of diffing values (a `"schema"` result; see
 [`compare_columns()`](https://thays42.github.io/datadiffr/reference/compare_columns.md)).
 
 ## Migrating from dataCompareR

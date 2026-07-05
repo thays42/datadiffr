@@ -77,8 +77,10 @@ tolerating small numeric differences, and rendering an HTML report.</p>
 <h2 id="a-first-comparison">A first comparison<a class="anchor" aria-label="anchor" href="#a-first-comparison"></a>
 </h2>
 <p>Start with two versions of the same small table.
-<code><a href="../reference/compare_data.html">compare_data()</a></code> returns the differences as a tidy data
-frame.</p>
+<code><a href="../reference/compare_data.html">compare_data()</a></code> returns a <code>datadiff_result</code> — an
+object describing what it found. It prints a one-line summary above a
+table of the differences, which is handy when you are working in a plain
+console rather than the HTML report.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">before</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id    <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,</span>
@@ -106,7 +108,19 @@ frame.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     5 both       context    <span style="color: #BB0000;">NA</span>          5 Eve      95</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     6 both       diff       x           6 Finn     60</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     6 both       diff       y           6 Finn     72</span></span></code></pre></div>
-<p>The result carries a few bookkeeping columns alongside your data:</p>
+<p>The object’s <code>$kind</code> field names what kind of difference
+was found:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_data.html">compare_data</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span><span class="op">)</span></span>
+<span><span class="va">diff</span><span class="op">$</span><span class="va">kind</span></span>
+<span><span class="co">#&gt; [1] "value"</span></span></code></pre></div>
+<p><code>"value"</code> means the two frames share the same columns but
+some values differ. (The other kinds are <code>"identical"</code>, when
+the frames match, and <code>"schema"</code>, when the columns themselves
+differ — see <a href="#when-the-columns-themselves-differ">When the
+columns themselves differ</a> below.) For a value diff, the differing
+rows are in <code>$rows</code>, a tidy data frame carrying a few
+bookkeeping columns alongside your data:</p>
 <ul>
 <li>
 <code>.row</code> — the row number the difference came from.</li>
@@ -122,10 +136,8 @@ or a <code>"context"</code> row.</li>
 <code>NA</code> for context rows.</li>
 </ul>
 <p>Each changed row appears twice — the before value above the after
-value — so you can read the change top to bottom, like a unified diff.
-The object prints a one-line summary above the table (here, two changed
-rows), which is handy when you are working in a plain console rather
-than the HTML report.</p>
+value — so you can read the change top to bottom, like a unified
+diff.</p>
 </div>
 <div class="section level2">
 <h2 id="controlling-context">Controlling context<a class="anchor" aria-label="anchor" href="#controlling-context"></a>
@@ -134,7 +146,7 @@ than the HTML report.</p>
 before and after. <code>context_rows</code> takes a length-two vector —
 rows before, rows after — so you can widen, narrow, or drop the context
 entirely.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># No context: only the rows that actually changed</span></span>
 <span><span class="fu"><a href="../reference/compare_data.html">compare_data</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span>, context_rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">datadiff</span>: 2 changed, 0 added, 0 removed rows across 1 column</span></span>
@@ -147,7 +159,7 @@ entirely.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     3 both       diff       y           3 Cai      79</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     6 both       diff       x           6 Finn     60</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     6 both       diff       y           6 Finn     72</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># One row of context on each side</span></span>
 <span><span class="fu"><a href="../reference/compare_data.html">compare_data</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span>, context_rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1L</span>, <span class="fl">1L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">datadiff</span>: 2 changed, 0 added, 0 removed rows across 1 column</span></span>
@@ -175,7 +187,7 @@ sort changed, rows were inserted or deleted — match on one or more key
 columns instead with <code>by =</code>. Keys must exist in both frames
 and identify rows uniquely; the output is ordered by the key and always
 includes it.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># `after` is shuffled and has a new row (id 7) and a dropped row (id 3)</span></span>
 <span><span class="va">after_shuffled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">1L</span>, <span class="fl">4L</span>, <span class="fl">5L</span>, <span class="fl">6L</span>, <span class="fl">7L</span><span class="op">)</span>,</span>
@@ -204,7 +216,7 @@ only).</p>
 <p>Floating-point data is rarely bit-identical. <code>tolerance</code>
 treats numeric values within a threshold as equal, so tiny differences
 don’t flood the report.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0000</span>, <span class="fl">2.0000</span>, <span class="fl">3.0000</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">recomputed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0001</span>, <span class="fl">2.5000</span>, <span class="fl">3.0000</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -239,21 +251,32 @@ the natural scale for dates (days) and datetimes (seconds).</p>
 <h2 id="when-the-columns-themselves-differ">When the columns themselves differ<a class="anchor" aria-label="anchor" href="#when-the-columns-themselves-differ"></a>
 </h2>
 <p>datadiffr compares values, so it expects the two frames to share the
-same columns with compatible types. If they don’t, it reports the
-<em>column</em> differences instead of trying to diff the values. You
-can inspect those directly with <code><a href="../reference/compare_columns.html">compare_columns()</a></code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+same columns with compatible types. If they don’t,
+<code><a href="../reference/compare_data.html">compare_data()</a></code> doesn’t error — it returns a
+<code>"schema"</code> result reporting the <em>column</em> differences
+instead of diffing the values.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, value <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, note <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">2.5</span>, <span class="fl">3.5</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/compare_columns.html">compare_columns</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
+<span><span class="va">schema_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_data.html">compare_data</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
+<span><span class="va">schema_diff</span><span class="op">$</span><span class="va">kind</span></span>
+<span><span class="co">#&gt; [1] "schema"</span></span></code></pre></div>
+<p>For a schema result the column differences are in
+<code>$columns</code> — the same table <code><a href="../reference/compare_columns.html">compare_columns()</a></code>
+returns directly:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">schema_diff</span><span class="op">$</span><span class="va">columns</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   .diff         column x_type    y_type </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> in x only     note   character <span style="color: #BB0000;">NA</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> type conflict value  integer   numeric</span></span></code></pre></div>
 <p>Here <code>value</code> changed type (integer to double) and
-<code>note</code> exists only in <code>x</code>.</p>
+<code>note</code> exists only in <code>x</code>. Because the kind is
+always one of <code>"value"</code>, <code>"identical"</code>, or
+<code>"schema"</code>, calling code can branch on <code>$kind</code> and
+read <code>$rows</code> or <code>$columns</code> accordingly.</p>
 </div>
 <div class="section level2">
 <h2 id="rendering-an-html-report">Rendering an HTML report<a class="anchor" aria-label="anchor" href="#rendering-an-html-report"></a>
@@ -262,11 +285,11 @@ can inspect those directly with <code><a href="../reference/compare_columns.html
 styled, self-contained HTML report — changed rows colored red (before)
 and green (after), with context rows grayed out. In an interactive
 session it opens in the RStudio viewer or your browser:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/diffdata.html">diffdata</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span><span class="op">)</span></span></code></pre></div>
 <p>To save the report instead of opening it, pass
 <code>output_file</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/diffdata.html">diffdata</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span>, output_file <span class="op">=</span> <span class="st">"diff-report.html"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/diffdata.html">diffdata()</a></code> defaults to <code>max_differences = 10</code>
 to keep reports fast to render; raise it if you need every difference in
@@ -274,7 +297,7 @@ the report. <code><a href="../reference/compare_data.html">compare_data()</a></c
 use, reports everything by default.</p>
 <p>If you already have a diff from <code><a href="../reference/compare_data.html">compare_data()</a></code>, render
 it directly with <code><a href="../reference/render_diff.html">render_diff()</a></code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_data.html">compare_data</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">after</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/render_diff.html">render_diff</a></span><span class="op">(</span><span class="va">diff</span><span class="op">)</span></span></code></pre></div>
 </div>

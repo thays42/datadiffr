@@ -92,20 +92,19 @@ exceeded, only the first <code>max_differences</code> differing rows are returne
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame containing differences between <code>x</code> and <code>y</code> with the
-following columns:</p><ul><li><p><code>.row</code> - The row number from the original data frames</p></li>
-<li><p><code>.join_type</code> - Whether the row is in <code>"x"</code>, <code>"y"</code>, or <code>"both"</code></p></li>
-<li><p><code>.diff_type</code> - Whether the row is a <code>"diff"</code> or <code>"context"</code> row</p></li>
-<li><p><code>.source</code> - For diff rows, whether this is the <code>"x"</code> or <code>"y"</code> version;
-<code>NA</code> for context rows</p></li>
-</ul><p>Plus the original data columns (context columns and columns with differences).</p>
+    <p>A <code>datadiff_result</code> object. <code>$kind</code> is <code>"identical"</code>, <code>"schema"</code>, or
+<code>"value"</code>. For <code>"schema"</code> (the frames have different column names or types)
+<code>$columns</code> holds a <code><a href="compare_columns.html">compare_columns()</a></code> tibble and <code>$rows</code> is <code>NULL</code>. For
+<code>"value"</code>/<code>"identical"</code> <code>$rows</code> holds a <code>datadiff_diff</code> of the differences
+(empty when identical) and <code>$columns</code> is <code>NULL</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Rows are matched by position (row number), or by key columns when <code>by</code>
 is given. <code>x</code> and <code>y</code> must share at least one column, and shared columns
-must have compatible types; otherwise an error is thrown. Rows present
-in only one data frame are always reported as differences.</p>
+must have compatible types; otherwise a <code>"schema"</code> result is returned
+instead of a row-level comparison. Rows present in only one data frame
+are always reported as differences.</p>
     </div>
 
     <div class="section level2">
@@ -145,12 +144,7 @@ in only one data frame are always reported as differences.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A numeric tolerance treats near-equal values as equal</span></span></span>
 <span class="r-in"><span><span class="fu">compare_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tolerance <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">datadiff</span>: 0 changed, 0 added, 0 removed rows across 0 columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance: 10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 0 × 6</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 variables: .row &lt;int&gt;, .join_type &lt;chr&gt;, .diff_type &lt;chr&gt;, .source &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   id &lt;int&gt;, score &lt;dbl&gt;</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No differences found.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

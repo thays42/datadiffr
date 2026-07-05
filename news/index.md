@@ -11,6 +11,14 @@ self-contained HTML report.
 ### Comparison
 
 - [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
+  now returns a consolidated `datadiff_result` object with a `kind` of
+  `"identical"`, `"schema"`, or `"value"`, instead of a bare diff
+  tibble. Differing columns are reported as a `"schema"` result rather
+  than an error, and
+  [`diffdata()`](https://thays42.github.io/datadiffr/reference/diffdata.md)
+  always returns this object invisibly
+  ([\#12](https://github.com/thays42/datadiffr/issues/12)).
+- [`compare_data()`](https://thays42.github.io/datadiffr/reference/compare_data.md)
   compares two data frames and returns the differences as a tidy data
   frame, matching rows by position or by key columns (`by =`), with
   configurable context rows around each change.
