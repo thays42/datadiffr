@@ -161,8 +161,8 @@ diffdata(
 
 `diffdata()` compares, then opens the HTML diff report with added rows
 in green, removed rows in red, and unchanged context rows for
-orientation. `compare_data()` returns the underlying diff as a data
-frame for programmatic use.
+orientation. `compare_data()` returns the underlying diff as a
+`datadiff_result` (with the diff rows in `$rows`) for programmatic use.
 
 ## Troubleshooting
 
