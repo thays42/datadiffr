@@ -56,7 +56,7 @@ summary(rCompare(a, b, keys = "id"))
 #> Data Comparison
 #> ===============
 #> 
-#> Date comparison run: 2026-07-05 20:37:04  
+#> Date comparison run: 2026-07-05 20:47:14  
 #> Comparison run on R version 4.6.1 (2026-06-24)  
 #> With datadiffr version 0.1.0  
 #> 

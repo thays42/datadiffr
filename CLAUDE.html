@@ -125,6 +125,13 @@
 <p>This keeps the project self-documenting and avoids hitting the same issues repeatedly.</p>
 </div>
 <div class="section level2">
+<h2 id="repository-conventions">Repository Conventions<a class="anchor" aria-label="anchor" href="#repository-conventions"></a></h2>
+<ul><li>
+<strong><code>docs/</code> belongs to pkgdown.</strong> It is the pkgdown site build/output directory (<code>_pkgdown.yml</code>, deployed to <code>gh-pages</code>). Do <strong>not</strong> put hand-written files there — pkgdown fails its build with <code>check_dest_is_pkgdown()</code> (“<code>docs</code> is non-empty and not [a pkgdown site]”). Because <code>docs/</code> is in <code>.Rbuildignore</code>, local <code>R CMD check</code> passes and only the pkgdown CI workflow catches it.</li>
+<li>
+<strong>Design docs go in <code>dev/</code>, not <code>docs/</code>.</strong> When the brainstorming / writing-plans skills (or any workflow) save a spec or plan, write them under <code>dev/superpowers/specs/</code> and <code>dev/superpowers/plans/</code> — NOT the skills’ default <code>docs/superpowers/...</code>. <code>dev/</code> is already in <code>.Rbuildignore</code>. This project preference overrides the skills’ default spec/plan location.</li>
+</ul></div>
+<div class="section level2">
 <h2 id="code-style">Code Style<a class="anchor" aria-label="anchor" href="#code-style"></a></h2>
 <ul><li>Follow tidyverse style guide: snake_case for functions/variables</li>
 <li>Use <code>|&gt;</code> pipe operator for data transformations</li>
