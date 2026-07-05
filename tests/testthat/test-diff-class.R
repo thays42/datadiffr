@@ -108,3 +108,31 @@ test_that("new_datadiff_result builds a classed record", {
   expect_null(res$rows)
   expect_equal(res$tolerance, 1e-8)
 })
+
+test_that("print.datadiff_result dispatches on kind", {
+  identical_res <- new_datadiff_result(kind = "identical")
+  expect_message(print(identical_res), "[Nn]o differences")
+  expect_invisible(print(identical_res))
+
+  schema_res <- new_datadiff_result(
+    kind = "schema",
+    columns = tibble::tibble(.diff = "in x only", column = "z")
+  )
+  expect_message(print(schema_res), "[Cc]olumns differ")
+
+  x <- tibble::tibble(id = 1:2, v = c(1, 2))
+  y <- tibble::tibble(id = 1:2, v = c(1, 9))
+  value_res <- compare_data(x, y, context_rows = c(0L, 0L))
+  expect_output(print(value_res), "changed")
+})
+
+test_that("summary.datadiff_result dispatches on kind", {
+  schema_res <- new_datadiff_result(
+    kind = "schema",
+    columns = tibble::tibble(.diff = "in x only", column = "z")
+  )
+  s <- summary(schema_res)
+  expect_s3_class(s, "summary.datadiff_result")
+  expect_equal(s$kind, "schema")
+  expect_message(print(s), "[Cc]olumns differ")
+})
