@@ -78,6 +78,19 @@ When encountering friction with commands (special flags needed, multi-step proce
 
 This keeps the project self-documenting and avoids hitting the same issues repeatedly.
 
+## Repository Conventions
+
+- **`docs/` belongs to pkgdown.** It is the pkgdown site build/output directory
+  (`_pkgdown.yml`, deployed to `gh-pages`). Do **not** put hand-written files
+  there — pkgdown fails its build with `check_dest_is_pkgdown()` ("`docs` is
+  non-empty and not [a pkgdown site]"). Because `docs/` is in `.Rbuildignore`,
+  local `R CMD check` passes and only the pkgdown CI workflow catches it.
+- **Design docs go in `dev/`, not `docs/`.** When the brainstorming /
+  writing-plans skills (or any workflow) save a spec or plan, write them under
+  `dev/superpowers/specs/` and `dev/superpowers/plans/` — NOT the skills'
+  default `docs/superpowers/...`. `dev/` is already in `.Rbuildignore`. This
+  project preference overrides the skills' default spec/plan location.
+
 ## Code Style
 
 - Follow tidyverse style guide: snake_case for functions/variables
