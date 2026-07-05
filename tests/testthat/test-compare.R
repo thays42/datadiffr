@@ -225,7 +225,7 @@ test_that("compare_data respects tolerance parameter", {
   df2 <- tibble(a = c(1.001, 2.0, 3.0), b = c("x", "y", "z"))
 
   # With default tolerance, small difference should be detected
-  result_default <- compare_data(df1, df2, context_rows = c(0L, 0L))
+  result_default <- compare_data(df1, df2, context_rows = c(0L, 0L))$rows
   expect_true(nrow(result_default) > 0)
 
   # With larger tolerance, difference should be ignored
@@ -234,7 +234,7 @@ test_that("compare_data respects tolerance parameter", {
     df2,
     context_rows = c(0L, 0L),
     tolerance = 0.01
-  )
+  )$rows
   expect_equal(nrow(result_tolerant), 0)
 })
 
@@ -248,7 +248,7 @@ test_that("compare_data with tolerance handles multiple numeric columns", {
     df2,
     context_rows = c(0L, 0L),
     tolerance = 0.0001
-  )
+  )$rows
   expect_true(nrow(result_tight) > 0)
 
   # With loose tolerance, no differences
@@ -257,7 +257,7 @@ test_that("compare_data with tolerance handles multiple numeric columns", {
     df2,
     context_rows = c(0L, 0L),
     tolerance = 0.001
-  )
+  )$rows
   expect_equal(nrow(result_loose), 0)
 })
 
@@ -266,7 +266,7 @@ test_that("compare_data handles columns ending in .x or .y", {
   df1 <- tibble(value.x = 1:3, col = letters[1:3])
   df2 <- tibble(value.x = c(1L, 99L, 3L), col = letters[1:3])
 
-  result <- compare_data(df1, df2, context_rows = c(0L, 0L))
+  result <- compare_data(df1, df2, context_rows = c(0L, 0L))$rows
 
   # Should detect the difference in value.x at row 2
   expect_true(nrow(result) > 0)
@@ -294,7 +294,7 @@ test_that("compare_data reports added/deleted rows whose values are all NA", {
   x <- tibble(a = c(1, NA))
   y <- tibble(a = 1)
 
-  result <- compare_data(x, y, context_rows = c(0L, 0L))
+  result <- compare_data(x, y, context_rows = c(0L, 0L))$rows
 
   expect_equal(result$.row, 2)
   expect_equal(result$.join_type, "x")
@@ -305,7 +305,7 @@ test_that("compare_data handles grouped data frames", {
   x <- tibble(g = c("a", "a", "b", "b"), v = 1:4) |> group_by(g)
   y <- tibble(g = c("a", "a", "b", "b"), v = c(1L, 9L, 3L, 4L)) |> group_by(g)
 
-  result <- compare_data(x, y, context_rows = c(0L, 0L))
+  result <- compare_data(x, y, context_rows = c(0L, 0L))$rows
 
   expect_equal(unique(result$.row), 2)
   expect_equal(nrow(result), 2)
@@ -315,29 +315,48 @@ test_that("compare_data compares a user column named .rn", {
   x <- tibble(.rn = c(100, 200), a = 1:2)
   y <- tibble(.rn = c(100, 999), a = 1:2)
 
-  result <- compare_data(x, y, context_rows = c(0L, 0L))
+  result <- compare_data(x, y, context_rows = c(0L, 0L))$rows
 
   expect_equal(unique(result$.row), 2)
   expect_true(".rn" %in% names(result))
   expect_setequal(result$.rn, c(200, 999))
 })
 
-test_that("compare_data errors clearly on type-conflicted columns", {
-  x <- tibble(a = 1:3)
-  y <- tibble(a = c("1", "x", "3"))
-
-  expect_error(compare_data(x, y), "type")
+test_that("compare_data returns schema kind on type conflict", {
+  x <- tibble(a = 1:2, v = c(1L, 2L))
+  y <- tibble(a = 1:2, v = c("x", "y"))
+  res <- compare_data(x, y)
+  expect_s3_class(res, "datadiff_result")
+  expect_equal(res$kind, "schema")
+  expect_true("type conflict" %in% res$columns$.diff)
 })
 
-test_that("compare_data errors clearly with no columns in common", {
-  expect_error(compare_data(tibble(a = 1:2), tibble(b = 1:2)), "common")
+test_that("compare_data returns schema kind when no columns are shared", {
+  res <- compare_data(tibble(a = 1:2), tibble(b = 1:2))
+  expect_equal(res$kind, "schema")
+  expect_setequal(res$columns$.diff, c("in x only", "in y only"))
+})
+
+test_that("compare_data returns value kind carrying a datadiff_diff", {
+  x <- tibble(id = 1:2, v = c(1, 2))
+  y <- tibble(id = 1:2, v = c(1, 9))
+  res <- compare_data(x, y, context_rows = c(0L, 0L))
+  expect_equal(res$kind, "value")
+  expect_s3_class(res$rows, "datadiff_diff")
+})
+
+test_that("compare_data returns identical kind when frames match", {
+  x <- tibble(id = 1:2, v = c(1, 2))
+  res <- compare_data(x, x)
+  expect_equal(res$kind, "identical")
+  expect_equal(nrow(res$rows), 0)
 })
 
 test_that("compare_data accepts bare column names for context_cols", {
   x <- tibble(id = 1:3, a = c(1, 5, 3))
   y <- tibble(id = 1:3, a = c(1, 2, 3))
 
-  result <- compare_data(x, y, context_rows = c(0L, 0L), context_cols = id)
+  result <- compare_data(x, y, context_rows = c(0L, 0L), context_cols = id)$rows
 
   expect_named(
     result,
@@ -349,7 +368,7 @@ test_that("compare_data accepts bare column names for context_cols", {
     y,
     context_rows = c(0L, 0L),
     context_cols = starts_with("i")
-  )
+  )$rows
   expect_true("id" %in% names(result_helper))
 })
 
@@ -358,7 +377,12 @@ test_that("compare_data limits output with max_differences", {
   y <- tibble(a = c(9L, 2L, 8L, 7L))
 
   expect_message(
-    result <- compare_data(x, y, context_rows = c(0L, 0L), max_differences = 2),
+    result <- compare_data(
+      x,
+      y,
+      context_rows = c(0L, 0L),
+      max_differences = 2
+    )$rows,
     "3 differing rows"
   )
   expect_equal(unique(result$.row), c(1, 3))
@@ -396,7 +420,7 @@ test_that("truncation does not disguise hidden differences as context", {
       y,
       context_rows = c(0L, 2L),
       max_differences = 1
-    )
+    )$rows
   )
 
   # rows 2-6 differ but are truncated away; they must not reappear as
@@ -408,7 +432,7 @@ test_that("compare_data matches rows by key columns", {
   x <- tibble(id = c(1, 2, 3), v = c("a", "b", "c"))
   y <- tibble(id = c(2, 3, 4), v = c("b", "XX", "d"))
 
-  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))$rows
 
   # id 1 only in x, id 4 only in y, id 3 differs, id 2 matches
   expect_setequal(result$id, c(1, 3, 4))
@@ -421,7 +445,7 @@ test_that("key matching is not misaligned by an inserted row", {
   x <- tibble(id = c(1, 2, 3), v = c("a", "b", "c"))
   y <- tibble(id = c(1, 1.5, 2, 3), v = c("a", "z", "b", "c"))
 
-  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))$rows
 
   # only the inserted row differs
   expect_equal(result$id, 1.5)
@@ -432,7 +456,7 @@ test_that("compare_data supports multiple key columns", {
   x <- tibble(g = c("a", "a", "b"), i = c(1, 2, 1), v = 1:3)
   y <- tibble(g = c("a", "a", "b"), i = c(1, 2, 1), v = c(1L, 9L, 3L))
 
-  result <- compare_data(x, y, by = c("g", "i"), context_rows = c(0L, 0L))
+  result <- compare_data(x, y, by = c("g", "i"), context_rows = c(0L, 0L))$rows
 
   expect_equal(unique(result$g), "a")
   expect_equal(unique(result$i), 2)
@@ -452,7 +476,7 @@ test_that("compare_data works when only key columns are shared", {
   x <- tibble(id = 1:2)
   y <- tibble(id = 2:3)
 
-  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))
+  result <- compare_data(x, y, by = "id", context_rows = c(0L, 0L))$rows
 
   expect_setequal(result$id, c(1, 3))
   expect_setequal(result$.join_type, c("x", "y"))

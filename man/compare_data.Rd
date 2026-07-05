@@ -35,17 +35,11 @@ exceeded, only the first \code{max_differences} differing rows are returned
 \item{tolerance}{Numeric tolerance for comparing numeric values.}
 }
 \value{
-A data frame containing differences between \code{x} and \code{y} with the
-following columns:
-\itemize{
-\item \code{.row} - The row number from the original data frames
-\item \code{.join_type} - Whether the row is in \code{"x"}, \code{"y"}, or \code{"both"}
-\item \code{.diff_type} - Whether the row is a \code{"diff"} or \code{"context"} row
-\item \code{.source} - For diff rows, whether this is the \code{"x"} or \code{"y"} version;
-\code{NA} for context rows
-}
-
-Plus the original data columns (context columns and columns with differences).
+A \code{datadiff_result} object. \verb{$kind} is \code{"identical"}, \code{"schema"}, or
+\code{"value"}. For \code{"schema"} (the frames have different column names or types)
+\verb{$columns} holds a \code{\link[=compare_columns]{compare_columns()}} tibble and \verb{$rows} is \code{NULL}. For
+\code{"value"}/\code{"identical"} \verb{$rows} holds a \code{datadiff_diff} of the differences
+(empty when identical) and \verb{$columns} is \code{NULL}.
 }
 \description{
 Compare two data frames
@@ -53,8 +47,9 @@ Compare two data frames
 \details{
 Rows are matched by position (row number), or by key columns when \code{by}
 is given. \code{x} and \code{y} must share at least one column, and shared columns
-must have compatible types; otherwise an error is thrown. Rows present
-in only one data frame are always reported as differences.
+must have compatible types; otherwise a \code{"schema"} result is returned
+instead of a row-level comparison. Rows present in only one data frame
+are always reported as differences.
 }
 \examples{
 x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
