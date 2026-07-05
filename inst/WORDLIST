@@ -11,4 +11,5 @@ keyless
 pandoc
 reimplemented
 rmarkdown
+tibble
 tidyselect

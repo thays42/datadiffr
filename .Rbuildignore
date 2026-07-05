@@ -20,3 +20,4 @@
 ^_pkgdown\.yml$
 ^README\.Rmd$
 ^cran-comments\.md$
+^\.superpowers$

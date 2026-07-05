@@ -18,6 +18,77 @@ new_datadiff_diff <- function(
   x
 }
 
+# The consolidated object returned by compare_data(). Exactly one facet is
+# populated, keyed by `kind`: "schema" fills `columns` (a compare_columns
+# tibble), "value"/"identical" fill `rows` (a datadiff_diff; empty for
+# "identical"). `by` and `tolerance` record how the comparison was run.
+new_datadiff_result <- function(
+  kind,
+  columns = NULL,
+  rows = NULL,
+  by = NULL,
+  tolerance = NULL
+) {
+  structure(
+    list(
+      kind = kind,
+      columns = columns,
+      rows = rows,
+      by = by,
+      tolerance = tolerance
+    ),
+    class = "datadiff_result"
+  )
+}
+
+#' @export
+print.datadiff_result <- function(x, ...) {
+  switch(
+    x$kind,
+    identical = cli::cli_alert_success("No differences found."),
+    schema = {
+      cli::cli_alert_info("Columns differ; cannot compare values.")
+      print(x$columns, ...)
+    },
+    value = print(x$rows, ...)
+  )
+  invisible(x)
+}
+
+#' @export
+summary.datadiff_result <- function(object, ...) {
+  structure(
+    list(
+      kind = object$kind,
+      columns = object$columns,
+      rows = if (object$kind %in% c("value", "identical")) {
+        summary(object$rows)
+      } else {
+        NULL
+      },
+      by = object$by,
+      tolerance = object$tolerance
+    ),
+    class = "summary.datadiff_result"
+  )
+}
+
+#' @export
+print.summary.datadiff_result <- function(x, ...) {
+  switch(
+    x$kind,
+    identical = cli::cli_alert_success("No differences found."),
+    schema = {
+      cli::cli_alert_info(
+        "Columns differ ({nrow(x$columns)} column difference{?s})."
+      )
+      print(x$columns)
+    },
+    value = print(x$rows)
+  )
+  invisible(x)
+}
+
 # Count changed / added / removed rows from the diff rows of the object.
 datadiff_diff_counts <- function(x) {
   diff_rows <- x[x$.diff_type == "diff", ]

@@ -7,7 +7,7 @@ test_that("show_diff separates blocks with a border, not group rows", {
   x <- tibble(a = 1:10)
   y <- tibble(a = c(1L, 9L, 3L, 4L, 5L, 6L, 7L, 8L, 99L, 10L))
 
-  diff <- compare_data(x, y, context_rows = c(0L, 0L))
+  diff <- compare_data(x, y, context_rows = c(0L, 0L))$rows
   html <- as.character(show_diff(diff))
 
   # no kableExtra group-header rows (the O(n^2) pack_rows markup)
@@ -20,7 +20,7 @@ test_that("show_diff colours added and removed rows", {
   x <- tibble(a = c(1L, 2L))
   y <- tibble(a = c(1L, 9L))
 
-  diff <- compare_data(x, y, context_rows = c(0L, 0L))
+  diff <- compare_data(x, y, context_rows = c(0L, 0L))$rows
   html <- as.character(show_diff(diff))
 
   # removed (x) cells are red, added (y) cells green
@@ -32,7 +32,7 @@ test_that("show_diff adds column separators without per-cell column_spec", {
   x <- tibble(a = c(1L, 2L), b = c(3L, 4L))
   y <- tibble(a = c(1L, 9L), b = c(3L, 4L))
 
-  diff <- compare_data(x, y, context_rows = c(0L, 0L))
+  diff <- compare_data(x, y, context_rows = c(0L, 0L))$rows
   html <- as.character(show_diff(diff))
 
   # column borders come from a single scoped stylesheet rule
@@ -44,7 +44,7 @@ test_that("show_diff renders a single block without a leading separator", {
   x <- tibble(a = c(1L, 2L, 3L))
   y <- tibble(a = c(1L, 9L, 3L))
 
-  diff <- compare_data(x, y, context_rows = c(1L, 1L))
+  diff <- compare_data(x, y, context_rows = c(1L, 1L))$rows
   html <- as.character(show_diff(diff))
 
   # one contiguous block -> no block-separator border

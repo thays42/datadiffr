@@ -16,17 +16,14 @@
 #' @details
 #' Rows are matched by position (row number), or by key columns when `by`
 #' is given. `x` and `y` must share at least one column, and shared columns
-#' must have compatible types; otherwise an error is thrown. Rows present
-#' in only one data frame are always reported as differences.
-#' @return A data frame containing differences between `x` and `y` with the
-#'   following columns:
-#'   * `.row` - The row number from the original data frames
-#'   * `.join_type` - Whether the row is in `"x"`, `"y"`, or `"both"`
-#'   * `.diff_type` - Whether the row is a `"diff"` or `"context"` row
-#'   * `.source` - For diff rows, whether this is the `"x"` or `"y"` version;
-#'     `NA` for context rows
-#'
-#'   Plus the original data columns (context columns and columns with differences).
+#' must have compatible types; otherwise a `"schema"` result is returned
+#' instead of a row-level comparison. Rows present in only one data frame
+#' are always reported as differences.
+#' @return A `datadiff_result` object. `$kind` is `"identical"`, `"schema"`, or
+#'   `"value"`. For `"schema"` (the frames have different column names or types)
+#'   `$columns` holds a [compare_columns()] tibble and `$rows` is `NULL`. For
+#'   `"value"`/`"identical"` `$rows` holds a `datadiff_diff` of the differences
+#'   (empty when identical) and `$columns` is `NULL`.
 #' @examples
 #' x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
 #' y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
@@ -71,24 +68,13 @@ compare_data <- function(
   checkmate::assert_number(max_differences, lower = 0)
   checkmate::assert_number(tolerance, lower = 0)
 
-  if (length(intersect(names(x), names(y))) == 0) {
-    cli::cli_abort("`x` and `y` have no columns in common.")
-  }
   col_diff <- compare_columns(x, y)
-  conflicts <- col_diff[col_diff$.diff == "type conflict", ]
-  if (nrow(conflicts) > 0) {
-    cli::cli_abort(c(
-      "`x` and `y` have column type conflicts.",
-      set_names(
-        paste0(
-          conflicts$column,
-          ": ",
-          conflicts$x_type,
-          " vs ",
-          conflicts$y_type
-        ),
-        rep("x", nrow(conflicts))
-      )
+  if (nrow(col_diff) > 0) {
+    return(new_datadiff_result(
+      kind = "schema",
+      columns = col_diff,
+      by = by,
+      tolerance = tolerance
     ))
   }
 
@@ -103,13 +89,19 @@ compare_data <- function(
     context_cols <- union(by, context_cols)
   }
 
-  compare_join(x, y, by = by) |>
+  rows <- compare_join(x, y, by = by) |>
     compare_diff(
       context_rows = context_rows,
       context_cols = context_cols,
       max_differences = max_differences,
       tolerance = tolerance
     )
+  new_datadiff_result(
+    kind = if (nrow(rows) == 0) "identical" else "value",
+    rows = rows,
+    by = by,
+    tolerance = tolerance
+  )
 }
 
 compare_join <- function(x, y, by = NULL) {

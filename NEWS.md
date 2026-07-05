@@ -8,6 +8,10 @@ HTML report.
 
 ## Comparison
 
+* `compare_data()` now returns a consolidated `datadiff_result` object with a
+  `kind` of `"identical"`, `"schema"`, or `"value"`, instead of a bare diff
+  tibble. Differing columns are reported as a `"schema"` result rather than an
+  error, and `diffdata()` always returns this object invisibly (#12).
 * `compare_data()` compares two data frames and returns the differences as a
   tidy data frame, matching rows by position or by key columns (`by =`), with
   configurable context rows around each change.

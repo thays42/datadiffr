@@ -37,9 +37,10 @@ reports fast to render.}
 the report is saved to this location instead of opening in the viewer.}
 }
 \value{
-If \code{x} and \code{y} have column differences (different names or types),
-returns a visible data frame describing those differences (from \code{\link[=compare_columns]{compare_columns()}}).
-Otherwise, invisibly returns the diff data frame (from \code{\link[=compare_data]{compare_data()}}).
+Invisibly, a \code{datadiff_result} object (see \code{\link[=compare_data]{compare_data()}}). Called
+for its side effect: when columns match and values differ it renders an
+HTML report; when columns differ it prints the schema differences to the
+console; when the frames are identical it reports no differences.
 }
 \description{
 High-level function that compares two data frames and renders the result as

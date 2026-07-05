@@ -16,9 +16,10 @@
 #' @param tolerance Numeric tolerance for comparing numeric values.
 #' @param output_file Optional file path to save the HTML report. If provided,
 #'   the report is saved to this location instead of opening in the viewer.
-#' @return If `x` and `y` have column differences (different names or types),
-#'   returns a visible data frame describing those differences (from [compare_columns()]).
-#'   Otherwise, invisibly returns the diff data frame (from [compare_data()]).
+#' @return Invisibly, a `datadiff_result` object (see [compare_data()]). Called
+#'   for its side effect: when columns match and values differ it renders an
+#'   HTML report; when columns differ it prints the schema differences to the
+#'   console; when the frames are identical it reports no differences.
 #' @examplesIf interactive()
 #' x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
 #' y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))
@@ -60,13 +61,7 @@ diffdata <- function(
     tidyselect::eval_select(rlang::enquo(context_cols), data = x)
   )
 
-  col_diff <- compare_columns(x, y)
-  if (nrow(col_diff) > 0) {
-    cli::cli_alert_danger("Cannot diff data with column differences.")
-    return(col_diff)
-  }
-
-  data_diff <- compare_data(
+  result <- compare_data(
     x,
     y,
     by = by,
@@ -76,12 +71,7 @@ diffdata <- function(
     tolerance = tolerance
   )
 
-  if (nrow(data_diff) == 0) {
-    cli::cli_alert_success("No differences found.")
-    return(invisible(data_diff))
-  }
+  render_diff(result, output_file = output_file)
 
-  render_diff(data_diff, output_file = output_file)
-
-  invisible(data_diff)
+  invisible(result)
 }

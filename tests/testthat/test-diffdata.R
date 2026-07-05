@@ -58,17 +58,16 @@ test_that("diffdata validates tolerance and output_file", {
   expect_error(diffdata(df1, df2, output_file = 123), "'output_file'.*string")
 })
 
-test_that("diffdata returns column differences visibly", {
+test_that("diffdata returns a schema-kind result invisibly when columns differ", {
   df1 <- tibble(a = 1:5, b = letters[1:5])
-  df3 <- tibble(a = 1:5, c = letters[1:5]) # different column names
+  df3 <- tibble(a = 1:5, c = letters[1:5])
 
-  expect_message(
-    result <- diffdata(df1, df3),
-    "Cannot diff data with column differences."
-  )
-
-  expect_true(is.data.frame(result))
-  expect_true(".diff" %in% names(result))
+  expect_message(res <- diffdata(df1, df3), "[Cc]olumns differ")
+  expect_invisible(suppressMessages(diffdata(df1, df3)))
+  res <- suppressMessages(diffdata(df1, df3))
+  expect_s3_class(res, "datadiff_result")
+  expect_equal(res$kind, "schema")
+  expect_true("in y only" %in% res$columns$.diff)
 })
 
 test_that("render_diff validates the diff argument", {
@@ -88,17 +87,18 @@ test_that("diffdata handles edge cases", {
   df1 <- tibble(a = 1:5, b = letters[1:5])
   df2 <- tibble(a = c(1:4, 6L), b = letters[1:5])
   result <- diffdata(df1, df2, context_rows = c(0L, 0L))
-  expect_equal(unique(result$.row), 5)
+  expect_equal(unique(result$rows$.row), 5)
 
   result_ctx <- diffdata(df1, df2, context_rows = c(10L, 5L))
-  expect_equal(sort(unique(result_ctx$.row)), 1:5)
+  expect_equal(sort(unique(result_ctx$rows$.row)), 1:5)
 })
 
-test_that("diffdata reports no differences for identical data frames", {
-  df <- tibble(a = 1:3, b = letters[1:3])
-
-  expect_message(result <- diffdata(df, df), "[Nn]o differences")
-  expect_equal(nrow(result), 0)
+test_that("diffdata reports no differences", {
+  df <- tibble(a = 1:5, b = letters[1:5])
+  expect_message(res <- diffdata(df, df), "[Nn]o differences")
+  res <- suppressMessages(diffdata(df, df))
+  expect_s3_class(res, "datadiff_result")
+  expect_equal(res$kind, "identical")
 })
 
 test_that("render_diff handles an empty diff without error", {
@@ -119,7 +119,7 @@ test_that("diffdata writes output_file and passes bare context_cols through", {
   result <- diffdata(x, y, context_cols = id, output_file = out)
 
   expect_true(file.exists(out))
-  expect_true("id" %in% names(result))
+  expect_true("id" %in% names(result$rows))
 })
 
 test_that("render_diff errors when the output_file directory does not exist", {
