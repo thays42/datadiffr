@@ -3,13 +3,3 @@ linters: linters_with_defaults(
     line_length_linter = line_length_linter(120),
     object_usage_linter = NULL  # Disable "no visible binding" warnings (common with NSE in packages)
   )
-exclusions: list(
-    # dataCompareR compatibility layer: camelCase names mirror the original API
-    "R/rcompare.R" = list(object_name_linter = Inf),
-    "R/rcompare-methods.R" = list(object_name_linter = Inf),
-    "R/rcompare-output.R" = list(object_name_linter = Inf),
-    "tests/testthat/test-rcompare.R" = list(object_name_linter = Inf),
-    "tests/testthat/test-rcompare-methods.R" = list(object_name_linter = Inf),
-    "tests/testthat/test-rcompare-output.R" = list(object_name_linter = Inf),
-    "tests/testthat/test-rcompare-parity.R" = list(object_name_linter = Inf)
-  )

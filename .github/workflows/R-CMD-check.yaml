@@ -42,13 +42,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # dataCompareR was archived from CRAN (2026-02); install the last
-          # released version from the CRAN archive so the conditional parity
-          # tests (skip_if_not_installed) can run and dependency resolution
-          # doesn't fail on the missing Suggests.
-          extra-packages: |
-            any::rcmdcheck
-            url::https://cran.r-project.org/src/contrib/Archive/dataCompareR/dataCompareR_0.1.4.tar.gz
+          extra-packages: any::rcmdcheck
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

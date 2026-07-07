@@ -42,12 +42,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # dataCompareR is an archived Suggests (see R-CMD-check.yaml); install
-          # it from the CRAN archive so dependency resolution succeeds.
           extra-packages: |
             any::pkgdown
             local::.
-            url::https://cran.r-project.org/src/contrib/Archive/dataCompareR/dataCompareR_0.1.4.tar.gz
           needs: website
 
       - name: Build site

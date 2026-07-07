@@ -19,13 +19,3 @@ reference:
   desc: Turn a diff into an HTML report.
   contents:
   - render_diff
-- title: dataCompareR compatibility
-  desc: >
-    Clean-room drop-in replacements for the archived dataCompareR package,
-    returning objects with the same shape.
-  contents:
-  - rCompare
-  - generateMismatchData
-  - saveReport
-  - print.datadiff_compare
-  - summary.datadiff_compare

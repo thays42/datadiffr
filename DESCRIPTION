@@ -29,7 +29,6 @@ Suggests:
     lintr,
     flexdashboard,
     arsenal,
-    dataCompareR,
     compareDF,
     diffdf,
     waldo,
