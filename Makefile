@@ -9,7 +9,7 @@
 # not a file that will be created by the rule. This is important to prevent
 # conflicts if a file named 'test' ever exists in the directory, and it also
 # improves performance slightly as Make won't check for a file named 'test'.
-.PHONY: test lint check document snapshot restore format site
+.PHONY: test lint check document format site
 
 # Capture all command-line arguments passed to Make.
 # For example, if you run `make test R/file.R`, MAKECMDGOALS will be "test R/file.R".
@@ -44,14 +44,6 @@ check:
 document:
 	@echo "Running document..."
 	@R -s -e "devtools::document()"
-
-snapshot:
-	@echo "Snapshotting renv (including Suggests)..."
-	@R -s -e "renv::snapshot(type = 'all')"
-
-restore:
-	@echo "Restoring renv packages..."
-	@R -s -e "renv::restore()"
 
 format:
 	@echo "Formatting package..."

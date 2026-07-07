@@ -81,9 +81,8 @@ Meaningful commits: Write clear commit messages describing changes
 Feature branches: Use branches for new features or major changes
 Pull request reviews: Require code review for all changes
 Package Management
-renv integration: Use renv for reproducible package management
-Dependency tracking: Keep renv.lock updated with current dependency versions
-Development tools: Include devtools, testthat, lintr in Suggests
+Dependency source of truth: Declare package dependencies in DESCRIPTION (Imports/Suggests); no renv. CI installs via pak from DESCRIPTION.
+Development tools: Keep pure dev tools (devtools, lintr) out of Suggests; install them globally. Suggests is for packages used by tests, vignettes, and examples.
 9. Current Issues to Address
 Immediate Fixes Needed
 Type validation bugs: Fix assert_class() calls that incorrectly reject integer inputs

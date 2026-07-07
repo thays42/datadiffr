@@ -25,12 +25,6 @@ make check
 # Generate documentation (roxygen2)
 make document
 
-# Snapshot renv (captures all deps including Suggests)
-make snapshot
-
-# Restore renv packages from lockfile
-make restore
-
 # Format package code
 make format
 
