@@ -23,11 +23,13 @@ differ in every column, so they are always kept);
 \value{
 A tibble. \code{get_differences()}: \code{.row} (the row number the
 difference came from), \code{.source} (\code{"x"} or \code{"y"}), and the data
-columns. \code{get_cell_differences()}: \code{.row}, the key columns (when the
-comparison used \verb{by =}), \code{column}, \code{value_x}, and \code{value_y}; values are
-rendered as character (\code{NA} when the value is \code{NA} or the row exists in
-only one frame — use \code{get_differences()} when native types or that
-distinction matter). Both error on a \code{"schema"} result and return a
+columns. Rows present in only one frame appear in \code{get_differences()}
+even when there are no non-key columns to report as cells.
+\code{get_cell_differences()}: \code{.row}, the key columns (when the
+comparison used \verb{by =}), \code{.column}, \code{.value_x}, and \code{.value_y}; values
+are rendered as character (\code{NA} when the value is \code{NA} or the row
+exists in only one frame — use \code{get_differences()} when native types or
+that distinction matter). Both error on a \code{"schema"} result and return a
 zero-row tibble for an \code{"identical"} one. A comparison truncated by
 \code{max_differences} yields only the reported rows; compare with
 \code{max_differences = Inf} to extract everything.

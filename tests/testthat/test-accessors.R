@@ -112,12 +112,12 @@ test_that("get_cell_differences returns one row per differing cell", {
 
   out <- get_cell_differences(compare_data(x, y))
 
-  expect_named(out, c(".row", "column", "value_x", "value_y"))
+  expect_named(out, c(".row", ".column", ".value_x", ".value_y"))
   expect_equal(nrow(out), 2L)
   expect_equal(out$.row, c(2L, 4L))
-  expect_equal(out$column, c("score", "name"))
-  expect_equal(out$value_x, c("20", "dan"))
-  expect_equal(out$value_y, c("25", "dana"))
+  expect_equal(out$.column, c("score", "name"))
+  expect_equal(out$.value_x, c("20", "dan"))
+  expect_equal(out$.value_y, c("25", "dana"))
 })
 
 test_that("get_cell_differences includes key columns under keyed comparison", {
@@ -126,9 +126,20 @@ test_that("get_cell_differences includes key columns under keyed comparison", {
 
   out <- get_cell_differences(compare_data(x, y, by = "id"))
 
-  expect_named(out, c(".row", "id", "column", "value_x", "value_y"))
+  expect_named(out, c(".row", "id", ".column", ".value_x", ".value_y"))
   expect_equal(out$id, "b")
-  expect_equal(out$column, "score")
+  expect_equal(out$.column, "score")
+})
+
+test_that("get_cell_differences handles a key column named 'column'", {
+  x <- tibble(column = c("a", "b"), score = c(1, 2))
+  y <- tibble(column = c("a", "b"), score = c(1, 9))
+
+  out <- get_cell_differences(compare_data(x, y, by = "column"))
+
+  expect_named(out, c(".row", "column", ".column", ".value_x", ".value_y"))
+  expect_equal(out$column, "b")
+  expect_equal(out$.column, "score")
 })
 
 test_that("one-sided rows appear with NA on the missing side", {
@@ -138,9 +149,9 @@ test_that("one-sided rows appear with NA on the missing side", {
   out <- get_cell_differences(compare_data(x, y))
   row3 <- out[out$.row == 3L, ]
 
-  expect_setequal(row3$column, c("id", "score"))
-  expect_true(all(is.na(row3$value_y)))
-  expect_equal(row3$value_x[row3$column == "score"], "30")
+  expect_setequal(row3$.column, c("id", "score"))
+  expect_true(all(is.na(row3$.value_y)))
+  expect_equal(row3$.value_x[row3$.column == "score"], "30")
 })
 
 test_that("get_cell_differences respects the comparison tolerance", {
@@ -160,7 +171,7 @@ test_that("get_cell_differences filters cells by selected columns", {
 
   out <- get_cell_differences(result, columns = name)
 
-  expect_equal(out$column, "name")
+  expect_equal(out$.column, "name")
   expect_equal(out$.row, 2L)
 })
 
@@ -170,11 +181,51 @@ test_that("get_cell_differences is empty-but-stable for identical frames", {
   out <- get_cell_differences(compare_data(x, x))
 
   expect_identical(nrow(out), 0L)
-  expect_named(out, c(".row", "column", "value_x", "value_y"))
+  expect_named(out, c(".row", ".column", ".value_x", ".value_y"))
 })
 
 test_that("get_cell_differences errors on schema results", {
   result <- compare_data(tibble(a = 1), tibble(b = 1))
 
   expect_error(get_cell_differences(result), "schema")
+})
+
+test_that("column selections with no matching differences return zero rows", {
+  x <- tibble(a = c(1, 2), b = c("p", "q"))
+  y <- tibble(a = c(1, 9), b = c("p", "q"))
+  result <- compare_data(x, y)
+
+  expect_identical(nrow(get_differences(result, columns = b)), 0L)
+  expect_identical(nrow(get_cell_differences(result, columns = b)), 0L)
+})
+
+test_that("get_differences returns only the reported rows of a truncated result", {
+  x <- tibble(a = 1:5)
+  y <- tibble(a = c(9L, 8L, 7L, 6L, 5L))
+  result <- suppressMessages(compare_data(x, y, max_differences = 2))
+
+  out <- get_differences(result)
+
+  expect_setequal(out$.row, c(1L, 2L))
+})
+
+test_that("frames sharing only key columns yield rows but no cells", {
+  x <- tibble(id = 1:3)
+  y <- tibble(id = c(1:2, 4L))
+  result <- compare_data(x, y, by = "id")
+
+  rows <- get_differences(result)
+  cells <- get_cell_differences(result)
+
+  expect_setequal(rows$.row, c(3L, 4L))
+  expect_identical(nrow(cells), 0L)
+})
+
+test_that("cell values render with full precision and no padding", {
+  x <- tibble(a = 1.00000001)
+  y <- tibble(a = 1.00000002)
+
+  out <- get_cell_differences(compare_data(x, y, tolerance = 0))
+
+  expect_false(out$.value_x == out$.value_y)
 })

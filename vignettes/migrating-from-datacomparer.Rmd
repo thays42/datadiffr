@@ -53,7 +53,8 @@ get_cell_differences(result)
   columns, matching names case-insensitively. datadiffr treats column
   differences as a result in their own right: `compare_data()` returns a
   `"schema"` result describing them (see `compare_columns()`) and does not
-  compare values. To compare anyway, select the shared columns first.
+  compare values. To compare anyway, select the shared columns (and align
+  their types) first.
 * **Extra rows under positional matching.** dataCompareR truncated the
   longer frame; datadiffr reports the extra rows as differences.
 * **Rounding vs tolerance.** `roundDigits = k` is approximately

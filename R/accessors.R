@@ -60,11 +60,13 @@ n_differences.datadiff_result <- function(x, ...) {
 #' @param ... Passed on to methods.
 #' @return A tibble. `get_differences()`: `.row` (the row number the
 #'   difference came from), `.source` (`"x"` or `"y"`), and the data
-#'   columns. `get_cell_differences()`: `.row`, the key columns (when the
-#'   comparison used `by =`), `column`, `value_x`, and `value_y`; values are
-#'   rendered as character (`NA` when the value is `NA` or the row exists in
-#'   only one frame — use `get_differences()` when native types or that
-#'   distinction matter). Both error on a `"schema"` result and return a
+#'   columns. Rows present in only one frame appear in `get_differences()`
+#'   even when there are no non-key columns to report as cells.
+#'   `get_cell_differences()`: `.row`, the key columns (when the
+#'   comparison used `by =`), `.column`, `.value_x`, and `.value_y`; values
+#'   are rendered as character (`NA` when the value is `NA` or the row
+#'   exists in only one frame — use `get_differences()` when native types or
+#'   that distinction matter). Both error on a `"schema"` result and return a
 #'   zero-row tibble for an `"identical"` one. A comparison truncated by
 #'   `max_differences` yields only the reported rows; compare with
 #'   `max_differences = Inf` to extract everything.
@@ -91,7 +93,7 @@ get_differences.datadiff_result <- function(x, columns = NULL, ...) {
   if (!rlang::quo_is_null(selection)) {
     wanted <- resolve_diff_columns(x, selection)
     cells <- diff_cells(x)
-    rows <- rows[rows$.row %in% cells$.row[cells$column %in% wanted], ]
+    rows <- rows[rows$.row %in% cells$.row[cells$.column %in% wanted], ]
   }
 
   rows$.join_type <- NULL
@@ -147,19 +149,19 @@ diff_cells <- function(x) {
     differs <- !is_equal(xb[[col]], yb[[col]], tolerance = x$tolerance)
     matched <- tibble::tibble(
       !!!xb[differs, c(".row", key_cols)],
-      column = col,
-      value_x = cell_chr(xb[[col]][differs]),
-      value_y = cell_chr(yb[[col]][differs])
+      .column = col,
+      .value_x = cell_chr(xb[[col]][differs]),
+      .value_y = cell_chr(yb[[col]][differs])
     )
     lone <- tibble::tibble(
       !!!singles[c(".row", key_cols)],
-      column = col,
-      value_x = as.character(ifelse(
+      .column = col,
+      .value_x = as.character(ifelse(
         singles$.source == "x",
         cell_chr(singles[[col]]),
         NA_character_
       )),
-      value_y = as.character(ifelse(
+      .value_y = as.character(ifelse(
         singles$.source == "y",
         cell_chr(singles[[col]]),
         NA_character_
@@ -170,12 +172,12 @@ diff_cells <- function(x) {
 
   proto <- tibble::tibble(
     !!!rows[0, c(".row", key_cols)],
-    column = character(),
-    value_x = character(),
-    value_y = character()
+    .column = character(),
+    .value_x = character(),
+    .value_y = character()
   )
   bind_rows(proto, lapply(value_cols, one_column)) |>
-    arrange(.data$.row, match(.data$column, value_cols))
+    arrange(.data$.row, match(.data$.column, value_cols))
 }
 
 # Character rendering for cell values: NA stays NA, list-column elements
@@ -190,7 +192,7 @@ cell_chr <- function(v) {
       if (is.atomic(e) && length(e) == 1L && is.na(e)) {
         return(NA_character_)
       }
-      paste(format(e), collapse = ", ")
+      paste(trimws(format(e, digits = 15)), collapse = ", ")
     },
     character(1)
   )
@@ -210,7 +212,7 @@ get_cell_differences.datadiff_result <- function(x, columns = NULL, ...) {
   selection <- rlang::enquo(columns)
   if (!rlang::quo_is_null(selection)) {
     wanted <- resolve_diff_columns(x, selection)
-    cells <- cells[cells$column %in% wanted, ]
+    cells <- cells[cells$.column %in% wanted, ]
   }
 
   cells

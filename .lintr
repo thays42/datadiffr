@@ -4,5 +4,5 @@ linters: linters_with_defaults(
     object_usage_linter = NULL  # Disable "no visible binding" warnings (common with NSE in packages)
   )
 exclusions: list(
-    "R/diff-class.R" = list(commented_code_linter = 15)  # roxygen bullet list misread as commented code
+    "R/diff-class.R" = list(commented_code_linter = Inf)  # roxygen bullet list misread as commented code
   )
