@@ -15,6 +15,12 @@ reference:
   - compare_columns
   - compare_groups
   - is_equal
+- title: Results
+  desc: The comparison result object and its accessors.
+  contents:
+  - datadiff_result
+  - has_differences
+  - get_differences
 - title: Rendering
   desc: Turn a diff into an HTML report.
   contents:

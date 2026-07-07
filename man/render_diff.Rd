@@ -22,8 +22,10 @@ the report is saved to this location instead of (or in addition to) opening
 in the viewer.}
 }
 \value{
-Invisibly returns the path to the HTML file (either \code{output_file} if
-provided, or a temporary file path).
+For a \code{"value"} result (or a bare diff with rows), invisibly
+returns the path to the HTML file — \code{output_file} if provided, a
+temporary file otherwise. For \code{"identical"} and \code{"schema"} results and
+zero-row diffs nothing is rendered and \code{invisible(NULL)} is returned.
 }
 \description{
 Opens the diff as an HTML report in the RStudio viewer (if available) or

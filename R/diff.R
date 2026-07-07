@@ -100,8 +100,10 @@ add_column_borders <- function(tbl) {
 #' @param output_file Optional file path to save the HTML report. If provided,
 #'   the report is saved to this location instead of (or in addition to) opening
 #'   in the viewer.
-#' @return Invisibly returns the path to the HTML file (either `output_file` if
-#'   provided, or a temporary file path).
+#' @return For a `"value"` result (or a bare diff with rows), invisibly
+#'   returns the path to the HTML file — `output_file` if provided, a
+#'   temporary file otherwise. For `"identical"` and `"schema"` results and
+#'   zero-row diffs nothing is rendered and `invisible(NULL)` is returned.
 #' @examplesIf interactive()
 #' x <- data.frame(id = 1:5, score = c(10, 20, 30, 40, 50))
 #' y <- data.frame(id = 1:5, score = c(10, 25, 30, 40, 55))

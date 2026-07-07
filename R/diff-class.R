@@ -3,6 +3,42 @@
 # renderer and any downstream code read the tolerance and truncation state
 # from the object instead of re-deriving them.
 
+#' The result of a data frame comparison
+#'
+#' [compare_data()] and [diffdata()] return a `datadiff_result`: a list
+#' carrying one comparison outcome and the settings that produced it, with
+#' `print()` and `summary()` methods.
+#'
+#' @details
+#' A `datadiff_result` has five elements:
+#'
+#' * `kind` — `"identical"` (no differences), `"schema"` (the frames'
+#'   column names or types differ, so values were not compared), or
+#'   `"value"` (row-level differences were found).
+#' * `columns` — for `"schema"` results, the [compare_columns()] tibble
+#'   describing the column differences; otherwise `NULL`.
+#' * `rows` — for `"value"` and `"identical"` results, a tibble of the
+#'   differing rows plus surrounding context rows; otherwise `NULL`.
+#' * `by` — the key columns rows were matched on, or `NULL` for positional
+#'   matching.
+#' * `tolerance` — the numeric tolerance the comparison used.
+#'
+#' For programmatic access prefer the accessors — [has_differences()],
+#' [n_differences()], [get_differences()], and [get_cell_differences()] —
+#' over indexing into `rows`: the bookkeeping columns inside `rows`
+#' (`.row`, `.join_type`, `.diff_type`, `.source`) and its attributes are
+#' internal and may change.
+#'
+#' @examples
+#' x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
+#' y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
+#'
+#' result <- compare_data(x, y)
+#' result$kind
+#' summary(result)
+#' @name datadiff_result
+NULL
+
 new_datadiff_diff <- function(
   x,
   tolerance,
@@ -104,7 +140,7 @@ print.datadiff_diff <- function(x, ...) {
   counts <- datadiff_diff_counts(x)
   cols <- attr(x, "diff_columns")
   lines <- cli::format_inline(
-    "{.strong datadiff}: {counts$changed} changed, {counts$added} added, ",
+    "{.strong datadiffr}: {counts$changed} changed, {counts$added} added, ",
     "{counts$removed} removed row{?s} across {length(cols)} column{?s}"
   )
   tol <- attr(x, "tolerance")
@@ -145,7 +181,7 @@ summary.datadiff_diff <- function(object, ...) {
 #' @export
 print.summary.datadiff_diff <- function(x, ...) {
   lines <- cli::format_inline(
-    "{.strong datadiff}: {x$rows_changed} changed, {x$rows_added} added, ",
+    "{.strong datadiffr}: {x$rows_changed} changed, {x$rows_added} added, ",
     "{x$rows_removed} removed row{?s}"
   )
   if (length(x$columns_changed) > 0) {

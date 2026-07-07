@@ -19,11 +19,13 @@
 #' must have compatible types; otherwise a `"schema"` result is returned
 #' instead of a row-level comparison. Rows present in only one data frame
 #' are always reported as differences.
-#' @return A `datadiff_result` object. `$kind` is `"identical"`, `"schema"`, or
-#'   `"value"`. For `"schema"` (the frames have different column names or types)
-#'   `$columns` holds a [compare_columns()] tibble and `$rows` is `NULL`. For
-#'   `"value"`/`"identical"` `$rows` holds a `datadiff_diff` of the differences
-#'   (empty when identical) and `$columns` is `NULL`.
+#' @return A [datadiff_result] object: a list with elements `$kind`
+#'   (`"identical"`, `"schema"`, or `"value"`), `$columns`, `$rows`, `$by`,
+#'   and `$tolerance`. For `"schema"` (the frames have different column names
+#'   or types) `$columns` holds a [compare_columns()] tibble and `$rows` is
+#'   `NULL`; otherwise `$rows` holds a tibble of the differing rows plus
+#'   context (empty when identical) and `$columns` is `NULL`. Use
+#'   [get_differences()] and friends to extract the differences.
 #' @examples
 #' x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
 #' y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
