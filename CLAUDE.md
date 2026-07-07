@@ -33,6 +33,9 @@ make restore
 
 # Format package code
 make format
+
+# Build pkgdown site locally (preview only — docs/ is gitignored, CI deploys)
+make site
 ```
 
 ## Architecture
@@ -80,11 +83,20 @@ This keeps the project self-documenting and avoids hitting the same issues repea
 
 ## Repository Conventions
 
-- **`docs/` belongs to pkgdown.** It is the pkgdown site build/output directory
-  (`_pkgdown.yml`, deployed to `gh-pages`). Do **not** put hand-written files
-  there — pkgdown fails its build with `check_dest_is_pkgdown()` ("`docs` is
-  non-empty and not [a pkgdown site]"). Because `docs/` is in `.Rbuildignore`,
-  local `R CMD check` passes and only the pkgdown CI workflow catches it.
+- **`docs/` belongs to pkgdown and is never committed.** It is the pkgdown
+  build output directory and is in `.gitignore`. The public site is built and
+  deployed by CI (`.github/workflows/pkgdown.yaml`, GitHub Pages actions) on
+  every push to `main`; local `make site` builds are throwaway previews. Do
+  **not** put hand-written files there — pkgdown fails its build with
+  `check_dest_is_pkgdown()` ("`docs` is non-empty and not [a pkgdown site]").
+- **Root `.md` files are published to the website.** pkgdown renders every
+  top-level `.md` file into a public site page with no exclusion config (and
+  it ignores `.Rbuildignore`). `dev/build-site.R` — the single build codepath
+  for both CI and `make site` — hides everything except a whitelist
+  (`README`, `NEWS`, `LICENSE`, `cran-comments.md`, `404.md`) during the
+  build. New internal root `.md` files are therefore excluded automatically;
+  to *publish* a new root `.md` page, add it to the `public` vector in
+  `dev/build-site.R`. Never build the site by calling pkgdown directly.
 - **Design docs go in `dev/`, not `docs/`.** When the brainstorming /
   writing-plans skills (or any workflow) save a spec or plan, write them under
   `dev/superpowers/specs/` and `dev/superpowers/plans/` — NOT the skills'

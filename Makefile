@@ -9,7 +9,7 @@
 # not a file that will be created by the rule. This is important to prevent
 # conflicts if a file named 'test' ever exists in the directory, and it also
 # improves performance slightly as Make won't check for a file named 'test'.
-.PHONY: test lint check document snapshot restore
+.PHONY: test lint check document snapshot restore format site
 
 # Capture all command-line arguments passed to Make.
 # For example, if you run `make test R/file.R`, MAKECMDGOALS will be "test R/file.R".
@@ -56,3 +56,10 @@ restore:
 format:
 	@echo "Formatting package..."
 	@air format .
+
+# Build the pkgdown site locally (preview only; docs/ is gitignored and the
+# real site is built + deployed by CI). Uses dev/build-site.R so internal
+# root .md files (CLAUDE.md, TODO.md, ...) are excluded, same as CI.
+site:
+	@echo "Building pkgdown site..."
+	@Rscript dev/build-site.R

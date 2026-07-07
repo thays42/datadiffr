@@ -16,3 +16,8 @@ inst/doc
 vignettes/*.html
 vignettes/*.R
 .positai
+
+# pkgdown site build output — built and deployed by CI (pkgdown.yaml);
+# local builds via `make site` are previews only, never commit them
+/docs/
+*.pkgdown-bak
