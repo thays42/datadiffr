@@ -963,41 +963,6 @@
       "Maintainer": "Tyson Barrett <t.barrett88@gmail.com>",
       "Repository": "CRAN"
     },
-    "dataCompareR": {
-      "Package": "dataCompareR",
-      "Version": "0.1.4",
-      "Source": "Repository",
-      "Title": "Compare Two Data Frames and Summarise the Difference",
-      "Authors@R": "c( person(\"Sarah\", \"Johnston\",  email = \"Sarah.Johnston@capitalone.com\",  role = c(\"aut\", \"cre\")), person(\"Rob\", \"Noble-Eddy\", role = c(\"aut\")), person(\"Merlijn\", \"van Horssen\", role = c(\"aut\")), person(\"Krishan\", \"Bhasin\", role = c(\"aut\")), person(\"Sarah\", \"Pollicott\", role = c(\"aut\")), person(\"Lukas\", \"Drapal\", role = c(\"ctb\")), person(\"Nikolaos\", \"Perrakis\", role = c(\"ctb\")), person(\"Nikhil\", \"Thomas Joy\", role = c(\"ctb\")), person(\"Shahriar\", \"Asta\", role = c(\"ctb\")), person(\"Karandeep\", \"Lidher\", role = c(\"ctb\")), person(\"Dan\", \"Kellett\", role = c(\"ctb\")), person(\"Kevin\", \"Chisholm\", role = c(\"ctb\")), person(\"Laura\", \"Joy\", role = c(\"ctb\")), person(\"Fergus\", \"Wadsley\", role = c(\"ctb\")), person(\"Heather\", \"Hackett\", role = c(\"ctb\")), person(\"David\", \"Robinson\", role = c(\"ctb\")), person(\"Cheryl\", \"Renton\", role = c(\"ctb\")), person(\"Matt\", \"Triggs\", role = c(\"ctb\")), person(\"Carola\", \"Deppe\", role = c(\"ctb\")), person(\"Ruijing\", \"Li\", role = c(\"ctb\")), person(\"John\", \"Swift\", role = c(\"ctb\")), person(given = \"Capital One Services, LLC\",  email = \"opensource@capitalone.com\", role = c(\"cph\")) )",
-      "Description": "Easy comparison of two tabular data objects in R. Specifically designed to show differences between two sets of data in a useful way that should make it easier to understand the differences, and if necessary, help you work out how to remedy them. Aims to offer a more useful output than all.equal() when your two data sets do not match, but isn't intended to replace all.equal() as a way to test for equality.",
-      "Depends": [
-        "R (>= 3.2.3)"
-      ],
-      "Imports": [
-        "dplyr (>= 0.5.0)",
-        "knitr",
-        "stringi",
-        "markdown"
-      ],
-      "URL": "https://github.com/capitalone/dataCompareR",
-      "BugReports": "https://github.com/capitalone/dataCompareR/issues",
-      "License": "Apache License 2.0 | file LICENSE",
-      "RoxygenNote": "7.1.2",
-      "Suggests": [
-        "testthat",
-        "data.table",
-        "tibble",
-        "bit64",
-        "rmarkdown",
-        "titanic"
-      ],
-      "VignetteBuilder": "knitr",
-      "NeedsCompilation": "no",
-      "Author": "Sarah Johnston [aut, cre], Rob Noble-Eddy [aut], Merlijn van Horssen [aut], Krishan Bhasin [aut], Sarah Pollicott [aut], Lukas Drapal [ctb], Nikolaos Perrakis [ctb], Nikhil Thomas Joy [ctb], Shahriar Asta [ctb], Karandeep Lidher [ctb], Dan Kellett [ctb], Kevin Chisholm [ctb], Laura Joy [ctb], Fergus Wadsley [ctb], Heather Hackett [ctb], David Robinson [ctb], Cheryl Renton [ctb], Matt Triggs [ctb], Carola Deppe [ctb], Ruijing Li [ctb], John Swift [ctb], Capital One Services, LLC [cph]",
-      "Maintainer": "Sarah Johnston <Sarah.Johnston@capitalone.com>",
-      "Repository": "CRAN",
-      "Encoding": "UTF-8"
-    },
     "desc": {
       "Package": "desc",
       "Version": "1.4.3",
@@ -2078,6 +2043,42 @@
       "NeedsCompilation": "no",
       "Author": "Hadley Wickham [aut, cre], Posit Software, PBC [cph, fnd], Maximilian Girlich [ctb]",
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
+      "Repository": "CRAN"
+    },
+    "hunspell": {
+      "Package": "hunspell",
+      "Version": "3.0.6",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "High-Performance Stemmer, Tokenizer, and Spell Checker",
+      "Depends": [
+        "R (>= 3.0.2)"
+      ],
+      "Encoding": "UTF-8",
+      "Authors@R": "c( person(\"Jeroen\", \"Ooms\", ,\"jeroenooms@gmail.com\", role = c(\"aut\", \"cre\")), person(\"Authors of libhunspell\", role = \"cph\", comment = \"see AUTHORS file\"))",
+      "Description": "Low level spell checker and morphological analyzer based on the  famous 'hunspell' library <https://hunspell.github.io>. The package can analyze or check individual words as well as parse text, latex, html or xml documents. For a more user-friendly interface use the 'spelling' package which builds on this package to automate checking of files, documentation and vignettes in all common formats.",
+      "License": "GPL-2 | LGPL-2.1 | MPL-1.1",
+      "URL": "https://docs.ropensci.org/hunspell/ https://ropensci.r-universe.dev/hunspell",
+      "BugReports": "https://github.com/ropensci/hunspell/issues",
+      "Imports": [
+        "Rcpp",
+        "digest"
+      ],
+      "LinkingTo": [
+        "Rcpp (>= 0.12.12)"
+      ],
+      "Suggests": [
+        "spelling",
+        "testthat",
+        "knitr",
+        "rmarkdown"
+      ],
+      "VignetteBuilder": "knitr",
+      "RoxygenNote": "7.2.3",
+      "Language": "en-US",
+      "NeedsCompilation": "yes",
+      "Author": "Jeroen Ooms [aut, cre], Authors of libhunspell [cph] (see AUTHORS file)",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
       "Repository": "CRAN"
     },
     "ini": {
@@ -4143,6 +4144,33 @@
       "NeedsCompilation": "yes",
       "Author": "Brian Ripley [aut, cre, cph], Roger Bivand [ctb], William Venables [cph]",
       "Maintainer": "Brian Ripley <Brian.Ripley@R-project.org>",
+      "Repository": "CRAN"
+    },
+    "spelling": {
+      "Package": "spelling",
+      "Version": "2.3.2",
+      "Source": "Repository",
+      "Title": "Tools for Spell Checking in R",
+      "Authors@R": "c( person(\"Jeroen\", \"Ooms\", , \"jeroenooms@gmail.com\", role = c(\"cre\", \"aut\"), comment = c(ORCID = \"0000-0002-4035-0289\")), person(\"Jim\", \"Hester\", , \"james.hester@rstudio.com\", role = \"aut\"))",
+      "Description": "Spell checking common document formats including latex, markdown, manual pages, and description files. Includes utilities to automate checking of documentation and  vignettes as a unit test during 'R CMD check'. Both British and American English are  supported out of the box and other languages can be added. In addition, packages may define a 'wordlist' to allow custom terminology without having to abuse punctuation.",
+      "License": "MIT + file LICENSE",
+      "Encoding": "UTF-8",
+      "URL": "https://ropensci.r-universe.dev/spelling https://docs.ropensci.org/spelling/",
+      "BugReports": "https://github.com/ropensci/spelling/issues",
+      "Imports": [
+        "commonmark",
+        "xml2",
+        "hunspell (>= 3.0)",
+        "knitr"
+      ],
+      "Suggests": [
+        "pdftools"
+      ],
+      "RoxygenNote": "7.3.1",
+      "Language": "en-GB",
+      "NeedsCompilation": "no",
+      "Author": "Jeroen Ooms [cre, aut] (ORCID: <https://orcid.org/0000-0002-4035-0289>), Jim Hester [aut]",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
       "Repository": "CRAN"
     },
     "stringi": {

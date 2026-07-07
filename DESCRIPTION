@@ -32,13 +32,13 @@ Suggests:
     compareDF,
     diffdf,
     waldo,
-    spelling
+    spelling,
+    knitr
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports:
     checkmate,
     dplyr,
-    knitr,
     rlang,
     tidyselect,
     formattable,

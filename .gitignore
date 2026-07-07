@@ -15,3 +15,4 @@ coverage.xml
 inst/doc
 vignettes/*.html
 vignettes/*.R
+.positai
