@@ -93,10 +93,9 @@ in name or type, it reports those column differences instead of diffing values
 
 ## Migrating from dataCompareR
 
-datadiffr ships a clean-room `rCompare()` and friends
-(`generateMismatchData()`, `saveReport()`) with the same object shape as the
-archived `dataCompareR`, so existing scripts keep working. See
-`vignette("migrating-from-datacomparer")`.
+datadiffr covers the archived dataCompareR workflow — key-matched comparison,
+summaries, mismatch extraction, and saved reports — with a smaller API. See
+`vignette("migrating-from-datacomparer")` for a call-by-call mapping.
 
 ## License
 

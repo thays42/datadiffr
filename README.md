@@ -56,7 +56,7 @@ after <- data.frame(
 )
 
 compare_data(before, after, context_rows = c(1L, 1L))
-#> datadiff: 2 changed, 0 added, 0 removed rows across 2 columns
+#> datadiffr: 2 changed, 0 added, 0 removed rows across 2 columns
 #> Tolerance: 1.49011611938477e-08
 #> 
 #> # A tibble: 7 × 8
@@ -99,10 +99,10 @@ of diffing values (a `"schema"` result; see `compare_columns()`).
 
 ## Migrating from dataCompareR
 
-datadiffr ships a clean-room `rCompare()` and friends
-(`generateMismatchData()`, `saveReport()`) with the same object shape as
-the archived `dataCompareR`, so existing scripts keep working. See
-`vignette("migrating-from-datacomparer")`.
+datadiffr covers the archived dataCompareR workflow — key-matched
+comparison, summaries, mismatch extraction, and saved reports — with a
+smaller API. See `vignette("migrating-from-datacomparer")` for a
+call-by-call mapping.
 
 ## License
 
