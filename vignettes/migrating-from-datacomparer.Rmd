@@ -15,167 +15,51 @@ knitr::opts_chunk$set(
 ```
 
 dataCompareR was archived by CRAN in February 2026 and its repository is
-read-only. If `rCompare()` is part of your workflow, datadiffr provides a
-drop-in replacement for the package's entire exported surface —
-`rCompare()`, `print()`, `summary()`, `saveReport()`, and
-`generateMismatchData()` — reimplemented from scratch (no dataCompareR
-code is reused) and verified field-by-field against dataCompareR itself
-in datadiffr's test suite.
+read-only. datadiffr covers the same workflow — compare two data frames,
+summarize the result, extract the mismatches, save a report — with a
+smaller, snake_case API. This guide maps each dataCompareR call to its
+datadiffr equivalent.
 
-In most scripts, migration means replacing `library(dataCompareR)`
-with:
+## Call-by-call mapping
 
-```{r, eval = FALSE}
+| dataCompareR | datadiffr |
+|---------------------------------------------|--------------------------------------------------|
+| `rCompare(dfA, dfB)` | `compare_data(x, y)` |
+| `rCompare(dfA, dfB, keys = "id")` | `compare_data(x, y, by = "id")` |
+| `rCompare(dfA, dfB, roundDigits = 2)` | `compare_data(x, y, tolerance = 0.005)` |
+| `rCompare(dfA, dfB, trimChars = TRUE)` | trim first: `mutate(across(where(is.character), trimws))` |
+| `summary(comparison)` | `summary(result)` |
+| `comparison$mismatches` | `get_cell_differences(result)` |
+| `generateMismatchData(comparison, dfA, dfB)` | `get_differences(result)` |
+| `saveReport(comparison, "report")` | `render_diff(result, output_file = "report.html")` |
+
+A worked example:
+
+```{r}
 library(datadiffr)
+
+x <- data.frame(id = 1:4, score = c(10, 20, 30, 40))
+y <- data.frame(id = 1:4, score = c(10, 25, 30, 45))
+
+result <- compare_data(x, y, by = "id")
+summary(result)
+
+get_cell_differences(result)
 ```
 
-## Quick start
+## Differences worth knowing
 
-```{r}
-library(datadiffr)
-
-orders_old <- data.frame(
-  order_id = 1:5,
-  amount = c(10, 20.5, 30, 45, 50),
-  status = c("open", "open", "closed", "open", "closed")
-)
-orders_new <- data.frame(
-  order_id = c(1:4, 6L),
-  amount = c(10, 21.0, 30, 45, 60),
-  status = c("open", "paid", "closed", "open", "open")
-)
-
-cmp <- rCompare(orders_old, orders_new, keys = "order_id")
-cmp
-```
-
-The full report, as before:
-
-```{r}
-summary(cmp)
-```
-
-Everything downstream works the same way:
-
-```{r}
-mismatches <- generateMismatchData(cmp, orders_old, orders_new)
-mismatches$orders_old_mm
-```
-
-```{r, eval = FALSE}
-saveReport(cmp, reportName = "orders", reportLocation = ".")
-```
-
-## The compatibility surface
-
-| dataCompareR                  | datadiffr             | Notes                                        |
-|-------------------------------|-----------------------|----------------------------------------------|
-| `rCompare(dfA, dfB, keys, roundDigits, mismatches, trimChars)` | Same | Plus a `tolerance` extension (see below)     |
-| `print(x, nVars, nObs, verbose)` | Same               | Same console format                          |
-| `summary(x, mismatchCount)`   | Same                  | Same fields; deterministic detail tables     |
-| `saveReport(...)`             | Same                  | Same arguments, rendered with rmarkdown      |
-| `generateMismatchData(x, dfA, dfB)` | Same            | Same validation and return shape             |
-
-The returned object has class
-`c("datadiff_compare", "dataCompareRobject")` and the same six fields
-(`meta`, `colMatching`, `rowMatching`, `cleaninginfo`, `mismatches`,
-`matches`) with the same shapes, so code that inspects the object —
-`cmp$mismatches$AMOUNT`, `cmp$rowMatching$inboth`, and so on — keeps
-working.
-
-The comparison semantics are preserved, including the corners:
-
-* Column names are cleaned with `make.names()` and matched
-  case-insensitively; shared columns are reported upper-case and sorted.
-* Without `keys`, rows are compared by position and the longer frame is
-  truncated (recorded in `rowMatching$inA$indices_removed`).
-* With `keys`, key columns must exist in both frames (checked
-  case-sensitively against the cleaned names) and must identify rows
-  uniquely in each frame.
-* `NA` matches `NA` and `NaN` matches `NaN`, but `NA` does not match
-  `NaN`.
-* Factors are compared as character, and the coercion is recorded in
-  `cleaninginfo`.
-* Columns whose classes differ between the frames (for example integer
-  vs double) are reported as mismatching on every row, with types shown
-  and a blank difference.
-* The `mismatches` cap **errors** when exceeded — it does not truncate —
-  exactly as dataCompareR behaved.
-
-## Known differences
-
-These are deliberate and documented; none change the object contract:
-
-* **Detail tables are deterministic.** Where dataCompareR *sampled* rows
-  for `summary()` detail tables beyond `mismatchCount`, datadiffr sorts
-  by decreasing absolute difference and keeps the first rows. Reruns
-  produce identical reports.
-* **Metadata references datadiffr.** `summary()$version` is the
-  datadiffr version, and report headers say "With datadiffr version …".
-* **Clear validation errors.** Inputs must be data frames (dataCompareR
-  silently coerced some malformed inputs into empty comparisons), and
-  error messages are worded differently, though they fire in the same
-  situations.
-
-## Extensions
-
-`rCompare()` gains a `tolerance` argument, appended after the original
-arguments so positional calls behave identically. dataCompareR's only
-fuzziness mechanism was `roundDigits` (round both sides, then compare
-exactly), which fails on values that round in different directions:
-
-```{r}
-a <- data.frame(x = 1.14)
-b <- data.frame(x = 1.16)
-# rounds to 1.1 vs 1.2: reported as a mismatch
-length(rCompare(a, b, roundDigits = 1)$mismatches)
-# absolute tolerance: equal
-length(rCompare(a, b, tolerance = 0.05)$mismatches)
-```
-
-The default `tolerance = 0` keeps faithful exact comparison.
-
-The second extension is `render_diff()`: datadiffr's styled HTML diff
-report, straight from the comparison object.
-
-```{r, eval = FALSE}
-render_diff(cmp)                          # opens in the viewer
-render_diff(cmp, output_file = "cmp.html") # or saves to a file
-```
-
-## Graduating to the native API
-
-The compatibility layer is a stable endpoint — you can stay on it. But
-datadiffr's native API adds things `rCompare()` cannot express:
-
-```{r, eval = FALSE}
-diffdata(
-  orders_old,
-  orders_new,
-  by = "order_id",        # key-based matching, like rCompare keys
-  context_rows = c(2, 2), # unified-diff style context around changes
-  context_cols = c(order_id, amount),
-  tolerance = 0.01
-)
-```
-
-`diffdata()` compares, then opens the HTML diff report with added rows
-in green, removed rows in red, and unchanged context rows for
-orientation. `compare_data()` returns the underlying diff as a
-`datadiff_result` (with the diff rows in `$rows`) for programmatic use.
-
-## Troubleshooting
-
-* **"Key … was not found in both data frames"** — key names are checked
-  against the `make.names()`-cleaned column names, case-sensitively:
-  `keys = "ID"` does not find a column named `id`. This matches
-  dataCompareR.
-* **"Detected N mismatches, which exceeds the `mismatches` cap"** — the
-  cap is a guard, not a limit; raise it or drop the argument, as with
-  dataCompareR.
-* **`generateMismatchData()` says a frame was not part of the original
-  comparison** — like dataCompareR, frames are matched by the *names*
-  they were passed under at `rCompare()` time; pass the same variables.
-* **`render_diff()` asks for flexdashboard** — the HTML diff report
-  needs the suggested flexdashboard package:
-  `install.packages("flexdashboard")`.
+* **Column mismatches.** dataCompareR silently compared the intersection of
+  columns, matching names case-insensitively. datadiffr treats column
+  differences as a result in their own right: `compare_data()` returns a
+  `"schema"` result describing them (see `compare_columns()`) and does not
+  compare values. To compare anyway, select the shared columns first.
+* **Extra rows under positional matching.** dataCompareR truncated the
+  longer frame; datadiffr reports the extra rows as differences.
+* **Rounding vs tolerance.** `roundDigits = k` is approximately
+  `tolerance = 0.5 * 10^-k`. Rounding can still call two nearly-equal
+  values different when they round apart; tolerance compares distance
+  directly.
+* **Reports.** `render_diff()` and `diffdata()` produce a styled HTML diff
+  with context rows rather than a text report; `summary(result)` covers the
+  console.

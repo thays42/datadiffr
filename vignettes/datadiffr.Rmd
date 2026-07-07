@@ -56,18 +56,30 @@ diff$kind
 `"value"` means the two frames share the same columns but some values differ.
 (The other kinds are `"identical"`, when the frames match, and `"schema"`, when
 the columns themselves differ — see [When the columns themselves
-differ](#when-the-columns-themselves-differ) below.) For a value diff, the
-differing rows are in `$rows`, a tidy data frame carrying a few bookkeeping
-columns alongside your data:
+differ](#when-the-columns-themselves-differ) below.)
 
-- `.row` — the row number the difference came from.
-- `.join_type` — whether the row is in `"x"`, `"y"`, or `"both"`.
-- `.diff_type` — whether the row is a `"diff"` or a `"context"` row.
-- `.source` — for diff rows, whether it is the `"x"` (before) or `"y"` (after)
-  version; `NA` for context rows.
+## Extracting differences
 
-Each changed row appears twice — the before value above the after value — so you
-can read the change top to bottom, like a unified diff.
+Four accessors expose the result programmatically. `has_differences()` and
+`n_differences()` answer the quick questions:
+
+```{r}
+has_differences(diff)
+n_differences(diff)
+```
+
+`get_differences()` returns the differing rows: each changed row appears
+twice — the `"x"` (before) version above the `"y"` (after) version, like a
+unified diff — with `.row` recording the row number it came from.
+`get_cell_differences()` returns one row per changed cell:
+
+```{r}
+get_differences(diff)
+get_cell_differences(diff)
+```
+
+Both accept a tidyselect `columns` argument to focus on particular columns,
+for example `get_differences(diff, columns = score)`.
 
 ## Controlling context
 
@@ -185,6 +197,6 @@ render_diff(diff)
 
 ## Coming from dataCompareR?
 
-datadiffr also ships a clean-room drop-in replacement for the archived
-dataCompareR package — `rCompare()` and friends. See
-`vignette("migrating-from-datacomparer")`.
+datadiffr covers the archived dataCompareR package's workflow with a smaller
+API. See `vignette("migrating-from-datacomparer")` for a call-by-call
+mapping.
